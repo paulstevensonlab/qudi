@@ -204,7 +204,7 @@ class LaserQuantumLaser(Base, SimpleLaserInterface):
     def get_current_range(self):
         """ Get range for laser current.
 
-            @return tuple(flaot, float): range for laser current
+            @return tuple(float, float): range for laser current
         """
         return 0, 100
 
@@ -334,7 +334,7 @@ class LaserQuantumLaser(Base, SimpleLaserInterface):
             return LaserState.UNKNOWN
 
     def set_laser_state(self, status):
-        """ Set desited laser state.
+        """ Set desired laser state.
 
         @param LaserState status: desired laser state
         @return LaserState: actual laser state

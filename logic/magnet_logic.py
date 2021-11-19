@@ -1471,7 +1471,7 @@ class MagnetLogic(GenericLogic):
         param['ODMR peak/Magnet move ratio axis0'] = self.odmr_2d_peak_axis0_move_ratio
         param['ODMR peak/Magnet move ratio axis1'] = self.odmr_2d_peak_axis1_move_ratio
 
-        # extract the frequency meausure:
+        # extract the frequency measure:
         if param.get('Frequency') is not None:
             odmr_freq_meas = param['Frequency']['value'] * 1e6
             cont_meas = param['Contrast']['value']

@@ -35,29 +35,28 @@ from interface.microwave_interface import MicrowaveMode
 from interface.microwave_interface import TriggerEdge
 
 
-class MicrowaveSmbv(Base, MicrowaveInterface):
-    """ Hardware file to control a R&S SMBV100A microwave device.
+class MicrowaveSmate(Base, MicrowaveInterface):
+    """ Hardware file to control a R&S SMATE200A microwave device.
 
     Example config for copy-paste:
 
-    mw_source_smbv:
-        module.Class: 'microwave.mw_source_smbv.MicrowaveSmbv'
-        gpib_address: 'GPIB0::12::INSTR'
-        gpib_address: 'GPIB0::12::INSTR'
-        gpib_timeout: 10
+    mw_source_smate:
+        module.Class: 'microwave.mw_source_smate.MicrowaveSmate'
+        network_address: 'TCPIP::129.10.128.90::INSTR'
+        network_timeout: 10
 
     """
 
     # visa address of the hardware : this can be over ethernet, the name is here for
     # backward compatibility
-    _address = ConfigOption('gpib_address', missing='error')
-    _timeout = ConfigOption('gpib_timeout', 10, missing='warn')
+    _address = ConfigOption('network_address', missing='error')
+    _timeout = ConfigOption('network_timeout', 10, missing='warn')
 
     # to limit the power to a lower value that the hardware can provide
     _max_power = ConfigOption('max_power', None)
 
     # Indicate how fast frequencies within a list or sweep mode can be changed:
-    _FREQ_SWITCH_SPEED = 0.003  # Frequency switching speed in s (acc. to specs)
+    _FREQ_SWITCH_SPEED = 0.01  # Frequency switching speed in s (acc. to specs)
 
     def on_activate(self):
         """ Initialisation performed during activation of the module. """
@@ -105,17 +104,14 @@ class MicrowaveSmbv(Base, MicrowaveInterface):
 
         # values for SMBV100A
         limits.min_power = -145
-        limits.max_power = 30
+        limits.max_power = 6.5
 
-        limits.min_frequency = 9e3
-        limits.max_frequency = 6e9
-
-        if self.model == 'SMB100A':
-            limits.max_frequency = 3.2e9
+        limits.min_frequency = 100e3
+        limits.max_frequency = 3e9
 
         limits.list_minstep = 0.1
         limits.list_maxstep = limits.max_frequency - limits.min_frequency
-        limits.list_maxentries = 1
+        limits.list_maxentries = 10001
 
         limits.sweep_minstep = 0.1
         limits.sweep_maxstep = limits.max_frequency - limits.min_frequency
@@ -332,7 +328,7 @@ class MicrowaveSmbv(Base, MicrowaveInterface):
             self._connection.write(':POW {0:f}'.format(power))
             self._connection.write('*WAI')
 
-        self._command_wait('TRIG:FSW:SOUR EXT')
+        self._command_wait('TRIG:FSW:SOUR SING')
 
         actual_power = self.get_power()
         freq_list = self.get_frequency()

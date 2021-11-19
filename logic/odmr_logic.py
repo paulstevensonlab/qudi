@@ -45,6 +45,7 @@ class ODMRLogic(GenericLogic):
     microwave1 = Connector(interface='MicrowaveInterface')
     savelogic = Connector(interface='SaveLogic')
     taskrunner = Connector(interface='TaskRunner')
+    optimiserlogic = Connector(interface='OptimizerLogic')
 
     # config option
     mw_scanmode = ConfigOption(
@@ -68,6 +69,8 @@ class ODMRLogic(GenericLogic):
     lines_to_average = StatusVar('lines_to_average', 0)
     _oversampling = StatusVar('oversampling', default=10)
     _lock_in_active = StatusVar('lock_in_active', default=False)
+    _autotrack = StatusVar('autotrack',default=True)
+    _trackevery = StatusVar('trackevery',default=5)
 
     # Internal signals
     sigNextLine = QtCore.Signal()
@@ -354,6 +357,59 @@ class ODMRLogic(GenericLogic):
     def set_lock_in(self, active):
         self.lock_in = active
         return self.lock_in
+# new stuff starts here
+    @property
+    def autotrack(self):
+        return self._autotrack
+
+    @autotrack.setter
+    def autotrack(self, active):
+        """
+        Sets the status of autotracking
+
+        @param bool active: specify if signal should be detected with lock in
+        """
+        # checks if scanner is still running
+        if self.module_state() != 'locked' and isinstance(active, bool):
+            self._autotrack = active
+            self._odmr_counter.autotrack = self._autotrack
+        else:
+            self.log.warning('setter of autotrack. Logic is either locked or input value is no boolean.')
+
+        update_dict = {'autotrack': self._autotrack}
+        self.sigParameterUpdated.emit(update_dict)
+
+    def set_autotrack(self, active):
+        self.autotrack = active
+        return self.autotrack
+
+    @property
+    def trackevery(self):
+        return self._trackevery
+
+    @trackevery.setter
+    def trackevery(self, trackevery):
+        """
+        Sets the number of scans to track after
+
+        @param int oversampling: desired oversampling per frequency step
+        """
+        # checks if scanner is still running
+        if self.module_state() != 'locked' and isinstance(trackevery, (int, float)):
+            self._trackevery = int(trackevery)
+            self._odmr_counter.trackevery = self.trackevery
+        else:
+            self.log.warning('setter of trackevery failed. Logic is either locked or input value is '
+                             'no integer or float.')
+
+        update_dict = {'trackevery': self._trackevery}
+        self.sigParameterUpdated.emit(update_dict)
+
+    def set_trackevery(self, trackevery):
+        self.trackevery = trackevery
+        return self.trackevery
+
+# new stuff ends here
 
     def set_matrix_line_number(self, number_of_lines):
         """
@@ -738,6 +794,16 @@ class ODMRLogic(GenericLogic):
 
         (from mw_start to mw_stop in steps of mw_step)
         """
+        if self._autotrack:
+            if np.mod(self.elapsed_sweeps, self.trackevery) == 0:
+                self._stop_odmr_counter()
+                self.module_state.unlock()
+                if self.optimiserlogic().module_state() == 'idle':
+                    self.optimiserlogic().start_refocus(caller_tag='tracking')
+                    time.sleep(10)
+                self._start_odmr_counter()
+                self.module_state.lock()
+
         with self.threadlock:
             # If the odmr measurement is not running do nothing
             if self.module_state() != 'locked':
@@ -815,6 +881,7 @@ class ODMRLogic(GenericLogic):
             # Fire update signals
             self.sigOdmrElapsedTimeUpdated.emit(self.elapsed_time, self.elapsed_sweeps)
             self.sigOdmrPlotsUpdated.emit(self.odmr_plot_x, self.odmr_plot_y, self.odmr_plot_xy)
+
             self.sigNextLine.emit()
             return
 

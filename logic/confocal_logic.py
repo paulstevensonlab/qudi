@@ -427,6 +427,8 @@ class ConfocalLogic(GenericLogic):
 
         @return int: error code (0:OK, -1:error)
         """
+        # uncomment this later to test autosave
+        # self._save_xy_data(colorscale_range=cb_range, percentile_range=pcile_range, block=False)
         with self.threadlock:
             if self.module_state() == 'locked':
                 self.stopRequested = True
@@ -434,7 +436,7 @@ class ConfocalLogic(GenericLogic):
         return 0
 
     def initialize_image(self):
-        """Initalization of the image.
+        """Initialization of the image.
 
         @return int: error code (0:OK, -1:error)
         """
@@ -477,7 +479,7 @@ class ConfocalLogic(GenericLogic):
                     '({0:.3f},{1:.3f}).'.format(y1, y2))
                 return -1
 
-            # prevents distorion of the image
+            # prevents distortion of the image
             if (x2 - x1) >= (y2 - y1):
                 self._X = np.linspace(x1, x2, max(self.xy_resolution, 2))
                 self._Y = np.linspace(y1, y2, max(int(self.xy_resolution*(y2-y1)/(x2-x1)), 2))
@@ -747,6 +749,9 @@ class ConfocalLogic(GenericLogic):
                 # make a line from the current cursor position to
                 # the starting position of the first scan line of the scan
                 rs = self.return_slowness
+                # NI DAQ doesn't like single points for the delayed start process - defaulting to a minimum of 2
+                if rs == 1:
+                    rs = rs + 1
                 lsx = np.linspace(self._current_x, image[self._scan_counter, 0, 0], rs)
                 lsy = np.linspace(self._current_y, image[self._scan_counter, 0, 1], rs)
                 lsz = np.linspace(self._current_z, image[self._scan_counter, 0, 2], rs)

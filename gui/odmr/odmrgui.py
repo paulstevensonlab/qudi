@@ -87,6 +87,8 @@ class ODMRGui(GUIBase):
     sigClockFreqChanged = QtCore.Signal(float)
     sigOversamplingChanged = QtCore.Signal(int)
     sigLockInChanged = QtCore.Signal(bool)
+    sigAutotrackChanged = QtCore.Signal(bool)
+    sigTrackeveryChanged = QtCore.Signal(int)
     sigFitChanged = QtCore.Signal(str)
     sigNumberOfLinesChanged = QtCore.Signal(int)
     sigRuntimeChanged = QtCore.Signal(float)
@@ -332,6 +334,8 @@ class ODMRGui(GUIBase):
         self._sd.clock_frequency_DoubleSpinBox.setValue(self._odmr_logic.clock_frequency)
         self._sd.oversampling_SpinBox.setValue(self._odmr_logic.oversampling)
         self._sd.lock_in_CheckBox.setChecked(self._odmr_logic.lock_in)
+        self._sd.autotrack_CheckBox.setChecked(self._odmr_logic.autotrack)
+        self._sd.autotrack_SpinBox.setValue(self._odmr_logic.trackevery)
 
         # fit settings
         self._fsd = FitSettingsDialog(self._odmr_logic.fc)
@@ -386,6 +390,8 @@ class ODMRGui(GUIBase):
                                          QtCore.Qt.QueuedConnection)
         self.sigOversamplingChanged.connect(self._odmr_logic.set_oversampling, QtCore.Qt.QueuedConnection)
         self.sigLockInChanged.connect(self._odmr_logic.set_lock_in, QtCore.Qt.QueuedConnection)
+        self.sigAutotrackChanged.connect(self._odmr_logic.set_autotrack, QtCore.Qt.QueuedConnection)
+        self.sigTrackeveryChanged.connect(self._odmr_logic.set_trackevery, QtCore.Qt.QueuedConnection)
         self.sigSaveMeasurement.connect(self._odmr_logic.save_odmr_data, QtCore.Qt.QueuedConnection)
         self.sigAverageLinesChanged.connect(self._odmr_logic.set_average_length,
                                             QtCore.Qt.QueuedConnection)
@@ -917,10 +923,14 @@ class ODMRGui(GUIBase):
         clock_frequency = self._sd.clock_frequency_DoubleSpinBox.value()
         oversampling = self._sd.oversampling_SpinBox.value()
         lock_in = self._sd.lock_in_CheckBox.isChecked()
+        autotrack = self._sd.autotrack_CheckBox.isChecked()
+        trackevery = self._sd.autotrack_SpinBox.value()
         self.sigOversamplingChanged.emit(oversampling)
         self.sigLockInChanged.emit(lock_in)
         self.sigClockFreqChanged.emit(clock_frequency)
         self.sigNumberOfLinesChanged.emit(number_of_lines)
+        self.sigAutotrackChanged.emit(autotrack)
+        self.sigTrackeveryChanged.emit(trackevery)
         return
 
     def reject_settings(self):
@@ -929,6 +939,8 @@ class ODMRGui(GUIBase):
         self._sd.clock_frequency_DoubleSpinBox.setValue(self._odmr_logic.clock_frequency)
         self._sd.oversampling_SpinBox.setValue(self._odmr_logic.oversampling)
         self._sd.lock_in_CheckBox.setChecked(self._odmr_logic.lock_in)
+        self._sd.autotrack_CheckBox.setChecked(self._odmr_logic.autotrack)
+        self._sd.autotrack_SpinBox.setValue(self._odmr_logic.trackevery)
         return
 
     def do_fit(self):
@@ -1048,6 +1060,18 @@ class ODMRGui(GUIBase):
             self._sd.lock_in_CheckBox.blockSignals(True)
             self._sd.lock_in_CheckBox.setChecked(param)
             self._sd.lock_in_CheckBox.blockSignals(False)
+
+        param = param_dict.get('autotrack')
+        if param is not None:
+            self._sd.autotrack_CheckBox.blockSignals(True)
+            self._sd.autotrack_CheckBox.setChecked(param)
+            self._sd.autotrack_CheckBox.blockSignals(False)
+
+        param = param_dict.get('trackevery')
+        if param is not None:
+            self._sd.autotrack_SpinBox.blockSignals(True)
+            self._sd.autotrack_SpinBox.setValue(param)
+            self._sd.autotrack_SpinBox.blockSignals(False)
 
         param = param_dict.get('cw_mw_frequency')
         if param is not None:

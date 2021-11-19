@@ -117,6 +117,36 @@
         </widget>
        </item>
        <item>
+        <widget class="QLabel" name="label">
+         <property name="text">
+          <string>Variable optical attenuator (VOA)</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="voaLabel">
+         <property name="text">
+          <string>0 V</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QDoubleSpinBox" name="VoaVoltageDoubleSpinBox">
+         <property name="suffix">
+          <string>V</string>
+         </property>
+         <property name="decimals">
+          <number>3</number>
+         </property>
+         <property name="maximum">
+          <double>5.000000000000000</double>
+         </property>
+         <property name="singleStep">
+          <double>0.100000000000000</double>
+         </property>
+        </widget>
+       </item>
+       <item>
         <spacer name="verticalSpacer_3">
          <property name="orientation">
           <enum>Qt::Vertical</enum>
@@ -162,7 +192,7 @@
      <x>0</x>
      <y>0</y>
      <width>730</width>
-     <height>18</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuMenu">

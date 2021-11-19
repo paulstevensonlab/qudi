@@ -6,193 +6,121 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1011</width>
-    <height>611</height>
+    <width>931</width>
+    <height>820</height>
    </rect>
   </property>
-  <property name="contextMenuPolicy">
-   <enum>Qt::DefaultContextMenu</enum>
+  <property name="minimumSize">
+   <size>
+    <width>40</width>
+    <height>0</height>
+   </size>
   </property>
   <property name="windowTitle">
-   <string>qudi: Pulsed Control</string>
+   <string>qudi: Pulsed Measurement</string>
+  </property>
+  <property name="layoutDirection">
+   <enum>Qt::LeftToRight</enum>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <widget class="QFrame" name="frame">
-    <property name="geometry">
-     <rect>
-      <x>19</x>
-      <y>13</y>
-      <width>223</width>
-      <height>146</height>
-     </rect>
-    </property>
-    <property name="frameShape">
-     <enum>QFrame::StyledPanel</enum>
-    </property>
-    <property name="frameShadow">
-     <enum>QFrame::Raised</enum>
-    </property>
-    <widget class="QWidget" name="gridLayoutWidget">
-     <property name="geometry">
-      <rect>
-       <x>12</x>
-       <y>36</y>
-       <width>204</width>
-       <height>102</height>
-      </rect>
-     </property>
-     <layout class="QGridLayout" name="gridLayout_3">
-      <item row="1" column="0">
-       <widget class="QCheckBox" name="checkBox_DO2">
-        <property name="text">
-         <string>DO2</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="0">
-       <widget class="QCheckBox" name="checkBox_DO0">
-        <property name="text">
-         <string>DO0</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="1">
-       <widget class="QCheckBox" name="checkBox_DO5">
-        <property name="text">
-         <string>DO5</string>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="1">
-       <widget class="QCheckBox" name="checkBox_DO7">
-        <property name="text">
-         <string>DO7</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="1">
-       <widget class="QCheckBox" name="checkBox_DO3">
-        <property name="text">
-         <string>DO3</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="1">
-       <widget class="QCheckBox" name="checkBox_DO1">
-        <property name="text">
-         <string>DO1</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="0">
-       <widget class="QCheckBox" name="checkBox_DO4">
-        <property name="text">
-         <string>DO4</string>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="0">
-       <widget class="QCheckBox" name="checkBox_DO6">
-        <property name="text">
-         <string>DO6</string>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </widget>
-    <widget class="QPushButton" name="pushButton_CWon">
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>7</y>
-       <width>75</width>
-       <height>23</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>CW Control</string>
-     </property>
-    </widget>
-    <widget class="QTextBrowser" name="textBrowser_CWstatus">
-     <property name="geometry">
-      <rect>
-       <x>98</x>
-       <y>5</y>
-       <width>110</width>
-       <height>23</height>
-      </rect>
-     </property>
-     <property name="html">
-      <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; color:#55ff00;&quot;&gt;CW On&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-     </property>
-    </widget>
-   </widget>
+   <layout class="QGridLayout" name="gridLayout">
+    <item row="0" column="0">
+     <widget class="QTabWidget" name="tabWidget">
+      <property name="styleSheet">
+       <string notr="true">QTabWidget::tab:disabled { width: 0; height: 0; margin: 0; padding: 0; border: none; }</string>
+      </property>
+      <property name="currentIndex">
+       <number>-1</number>
+      </property>
+     </widget>
+    </item>
+   </layout>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1011</width>
+     <width>931</width>
      <height>21</height>
     </rect>
    </property>
-   <widget class="QMenu" name="menu_File">
+   <widget class="QMenu" name="menuFile">
     <property name="title">
-     <string>&amp;File</string>
+     <string>Fi&amp;le</string>
     </property>
-    <addaction name="action_Save"/>
-    <addaction name="action_Close"/>
+    <addaction name="actionSave"/>
+    <addaction name="actionClose"/>
    </widget>
-   <widget class="QMenu" name="menu_Options">
+   <widget class="QMenu" name="menuSettings">
     <property name="title">
-     <string>O&amp;ptions</string>
+     <string>Se&amp;ttings</string>
     </property>
-    <addaction name="action_Settings"/>
+    <addaction name="action_Predefined_Methods_Config"/>
+    <addaction name="separator"/>
+    <addaction name="action_Settings_Analysis"/>
     <addaction name="action_FitSettings"/>
+    <addaction name="action_Settings_Generator"/>
    </widget>
-   <widget class="QMenu" name="menu_View">
-    <property name="title">
-     <string>&amp;View</string>
-    </property>
-    <addaction name="action_RestoreDefault"/>
-   </widget>
-   <addaction name="menu_File"/>
-   <addaction name="menu_View"/>
-   <addaction name="menu_Options"/>
+   <addaction name="menuFile"/>
+   <addaction name="menuSettings"/>
   </widget>
-  <action name="action_Settings">
+  <widget class="QToolBar" name="analysis_ToolBar">
+   <property name="windowTitle">
+    <string>Measurement Control Toolbar</string>
+   </property>
+   <property name="layoutDirection">
+    <enum>Qt::LeftToRight</enum>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+   <addaction name="action_run_stop"/>
+   <addaction name="action_continue_pause"/>
+   <addaction name="action_pull_data"/>
+  </widget>
+  <widget class="QToolBar" name="save_ToolBar">
+   <property name="windowTitle">
+    <string>Save Toolbar</string>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+   <addaction name="action_save"/>
+  </widget>
+  <widget class="QToolBar" name="control_ToolBar">
+   <property name="windowTitle">
+    <string>Pulser Control Toolbar</string>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+  </widget>
+  <action name="action_Settings_Analysis">
    <property name="icon">
     <iconset>
      <normaloff>../../artwork/icons/oxygen/22x22/configure.png</normaloff>../../artwork/icons/oxygen/22x22/configure.png</iconset>
    </property>
    <property name="text">
-    <string>&amp;Settings</string>
+    <string>Analysis Settings</string>
    </property>
   </action>
-  <action name="action_Save">
+  <action name="actionSave">
    <property name="icon">
     <iconset>
      <normaloff>../../artwork/icons/oxygen/22x22/document-save.png</normaloff>../../artwork/icons/oxygen/22x22/document-save.png</iconset>
    </property>
    <property name="text">
     <string>&amp;Save</string>
-   </property>
-   <property name="toolTip">
-    <string>Save odmr data</string>
-   </property>
-  </action>
-  <action name="action_Close">
-   <property name="icon">
-    <iconset>
-     <normaloff>../../artwork/icons/oxygen/22x22/application-exit.png</normaloff>../../artwork/icons/oxygen/22x22/application-exit.png</iconset>
-   </property>
-   <property name="text">
-    <string>&amp;Close</string>
    </property>
   </action>
   <action name="action_run_stop">
@@ -202,13 +130,13 @@ p, li { white-space: pre-wrap; }
    <property name="icon">
     <iconset>
      <normaloff>../../artwork/icons/qudiTheme/22x22/start-counter.png</normaloff>
-     <activeon>../../artwork/icons/qudiTheme/22x22/stop-counter.png</activeon>../../artwork/icons/qudiTheme/22x22/start-counter.png</iconset>
+     <normalon>../../artwork/icons/qudiTheme/22x22/stop-counter.png</normalon>../../artwork/icons/qudiTheme/22x22/start-counter.png</iconset>
    </property>
    <property name="text">
-    <string>run_stop</string>
+    <string>Starts a new measurment or stops a measurement</string>
    </property>
   </action>
-  <action name="action_resume_odmr">
+  <action name="action_continue_pause">
    <property name="checkable">
     <bool>true</bool>
    </property>
@@ -217,48 +145,80 @@ p, li { white-space: pre-wrap; }
    </property>
    <property name="icon">
     <iconset>
-     <normaloff>../../artwork/icons/qudiTheme/22x22/restart-counter.png</normaloff>
-     <activeon>../../artwork/icons/qudiTheme/22x22/stop-counter.png</activeon>../../artwork/icons/qudiTheme/22x22/restart-counter.png</iconset>
+     <normaloff>../../artwork/icons/qudiTheme/22x22/restart-counter.png</normaloff>../../artwork/icons/qudiTheme/22x22/restart-counter.png</iconset>
    </property>
    <property name="text">
-    <string>resume_odmr</string>
+    <string>Pauses or continues a measurement</string>
    </property>
    <property name="toolTip">
-    <string>resume odmr measurement</string>
+    <string>action_continue_pause</string>
    </property>
   </action>
-  <action name="action_RestoreDefault">
+  <action name="action_save">
+   <property name="icon">
+    <iconset>
+     <normaloff>../../artwork/icons/oxygen/22x22/document-save.png</normaloff>../../artwork/icons/oxygen/22x22/document-save.png</iconset>
+   </property>
    <property name="text">
-    <string>Restore &amp;default</string>
+    <string>Save the current measurement data</string>
    </property>
   </action>
-  <action name="action_FitSettings">
-   <property name="text">
-    <string>Fit settings</string>
-   </property>
-  </action>
-  <action name="action_toggle_cw">
-   <property name="checkable">
-    <bool>true</bool>
+  <action name="action_pull_data">
+   <property name="enabled">
+    <bool>false</bool>
    </property>
    <property name="icon">
     <iconset>
-     <normaloff>../../artwork/icons/oxygen/22x22/media-playback-start.png</normaloff>
-     <normalon>../../artwork/icons/oxygen/22x22/media-playback-stop.png</normalon>
-     <activeon>../../artwork/icons/oxygen/22x22/media-playback-stop.png</activeon>../../artwork/icons/oxygen/22x22/media-playback-start.png</iconset>
+     <normaloff>../../artwork/icons/oxygen/22x22/view-refresh.png</normaloff>../../artwork/icons/oxygen/22x22/view-refresh.png</iconset>
    </property>
    <property name="text">
-    <string>toggle_cw</string>
+    <string>Pull and analyze data</string>
+   </property>
+  </action>
+  <action name="actionClose">
+   <property name="icon">
+    <iconset>
+     <normaloff>../../artwork/icons/oxygen/22x22/application-exit.png</normaloff>../../artwork/icons/oxygen/22x22/application-exit.png</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Close</string>
+   </property>
+  </action>
+  <action name="action_Predefined_Methods_Config">
+   <property name="icon">
+    <iconset>
+     <normaloff>../../artwork/icons/oxygen/22x22/configure.png</normaloff>../../artwork/icons/oxygen/22x22/configure.png</iconset>
+   </property>
+   <property name="text">
+    <string>Predefined Methods</string>
+   </property>
+  </action>
+  <action name="action_FitSettings">
+   <property name="icon">
+    <iconset>
+     <normaloff>../../artwork/icons/oxygen/22x22/configure.png</normaloff>../../artwork/icons/oxygen/22x22/configure.png</iconset>
+   </property>
+   <property name="text">
+    <string>Fit Settings</string>
    </property>
    <property name="toolTip">
-    <string>toggle microwave CW output</string>
+    <string>Customize fitting routines for pulsed measurements</string>
+   </property>
+  </action>
+  <action name="action_Settings_Generator">
+   <property name="icon">
+    <iconset>
+     <normaloff>../../artwork/icons/oxygen/22x22/configure.png</normaloff>../../artwork/icons/oxygen/22x22/configure.png</iconset>
+   </property>
+   <property name="text">
+    <string>Pulse Generator Settings</string>
    </property>
   </action>
  </widget>
  <resources/>
  <connections>
   <connection>
-   <sender>action_Close</sender>
+   <sender>actionClose</sender>
    <signal>triggered()</signal>
    <receiver>MainWindow</receiver>
    <slot>close()</slot>
@@ -268,13 +228,10 @@ p, li { white-space: pre-wrap; }
      <y>-1</y>
     </hint>
     <hint type="destinationlabel">
-     <x>531</x>
-     <y>347</y>
+     <x>504</x>
+     <y>541</y>
     </hint>
    </hints>
   </connection>
  </connections>
- <buttongroups>
-  <buttongroup name="buttonGroup"/>
- </buttongroups>
 </ui>

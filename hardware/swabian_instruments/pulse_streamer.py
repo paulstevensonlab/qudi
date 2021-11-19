@@ -87,7 +87,13 @@ class PulseStreamer(Base, PulserInterface):
         self.reset()
         del self.pulse_streamer
 
-    
+    def get_connection_status(self):
+        status_dict = dict()
+        status_dict['Connected'] = self.current_status
+        if self.current_status == 0:
+            status_dict['Connected IP'] = self._pulsestreamer_ip
+        return status_dict
+
     def get_constraints(self):
         """
         Retrieve the hardware constrains from the Pulsing device.
@@ -249,6 +255,10 @@ class PulseStreamer(Base, PulserInterface):
         self.__current_status = 0
         self.pulse_streamer.constant(self._laser_mw_on_state)
         return 0
+
+    def set_continuous_out(self,state_list):
+        high_inds_int = [int(i) for i in np.argwhere(np.asarray(state_list)>0)]
+        self.pulse_streamer.constant((high_inds_int, 0., 0.))
 
     
     def load_waveform(self, load_dict):

@@ -27,7 +27,7 @@ from core.connector import Connector
 from core.configoption import ConfigOption
 from logic.generic_logic import GenericLogic
 from interface.simple_laser_interface import ControlMode, ShutterState, LaserState
-
+from core.statusvariable import StatusVar
 
 class LaserLogic(GenericLogic):
     """ Logic module agreggating multiple hardware switches.
@@ -35,7 +35,14 @@ class LaserLogic(GenericLogic):
 
     # waiting time between queries im milliseconds
     laser = Connector(interface='SimpleLaserInterface')
-    queryInterval = ConfigOption('query_interval', 100)
+    queryInterval = ConfigOption('query_interval', 200)
+
+    # Need this to set the amplitude.
+    scanner = Connector(interface='ConfocalScannerInterface')
+    # Default to 0 V, which is zero attenuation.
+    # https://www.thorlabs.com/drawings/51658de5420550b4-9D54B893-9B1F-818E-91293FC428044917/V450A-SpecSheet.pdf
+    voa_voltage = StatusVar(name='voa_voltage', default=0.0)
+    # TODO: why doesn't this value survive closing and re-opening?
 
     sigUpdate = QtCore.Signal()
 
@@ -46,6 +53,10 @@ class LaserLogic(GenericLogic):
         self.stopRequest = False
         self.bufferLength = 100
         self.data = {}
+
+        # set up VOA
+        self._scanning_device = self.scanner()
+        self.voa_voltage_range = self._scanning_device.get_position_range()[3] # TODO: check the bounds on this
 
         # delay timer for querying laser
         self.queryTimer = QtCore.QTimer()
@@ -74,7 +85,7 @@ class LaserLogic(GenericLogic):
         self.start_query_loop()
 
     def on_deactivate(self):
-        """ Deactivate modeule.
+        """ Deactivate module.
         """
         self.stop_query_loop()
         for i in range(5):
@@ -99,6 +110,7 @@ class LaserLogic(GenericLogic):
             self.laser_current = self._laser.get_current()
             self.laser_current_setpoint = self._laser.get_current_setpoint()
             self.laser_temps = self._laser.get_temperatures()
+            self.voa_voltage = self.get_voa_voltage()
 
             for k in self.data:
                 self.data[k] = np.roll(self.data[k], -1)
@@ -178,6 +190,17 @@ class LaserLogic(GenericLogic):
     def set_power(self, power):
         """ Set laser output power. """
         self._laser.set_power(power)
+
+    @QtCore.Slot(float)
+    def set_voa_voltage(self, voltage):
+        """ Set voltage of variable optical attenuator (VOA). """
+        self._scanning_device.scanner_set_position(a=voltage)
+        self.voa_voltage = voltage
+
+    def get_voa_voltage(self):
+        """ Get voltage of variable optical attenuator (VOA). """
+        x,y,z,a = self._scanning_device.get_scanner_position()
+        return a
 
     @QtCore.Slot(float)
     def set_current(self, current):

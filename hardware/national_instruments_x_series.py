@@ -1063,7 +1063,7 @@ class NationalInstrumentsXSeries(Base, SlowCounterInterface, ConfocalScannerInte
         @param float[][n] voltages: array of n-part tuples defining the voltage
                                     points
         @param int length: number of tuples to write
-        @param bool start: write imediately (True)
+        @param bool start: write immediately (True)
                            or wait for start of task (False)
 
         n depends on how many channels are configured for analog output

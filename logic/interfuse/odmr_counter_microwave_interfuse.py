@@ -47,6 +47,8 @@ class ODMRCounterMicrowaveInterfuse(GenericLogic, ODMRCounterInterface,
         self._lock_in_active = False
         self._oversampling = 10
         self._odmr_length = 100
+        self._autotrack = True
+        self._trackevery = 5
 
 
     def on_activate(self):
@@ -304,3 +306,27 @@ class ODMRCounterMicrowaveInterfuse(GenericLogic, ODMRCounterInterface,
             self._lock_in_active = val
             if self._lock_in_active:
                 self.log.warn('Lock-In is not implemented')
+
+    @property
+    def autotrack_active(self):
+        return self._autotrack_active
+
+    @lock_in_active.setter
+    def autotrack_active(self, val):
+        if not isinstance(val, bool):
+            self.log.error('autotrack_active has to be boolean.')
+        else:
+            self._autotrack_active = val
+            if self._autotrack_active:
+                self.log.warn('Autotrack is not implemented')
+
+    @property
+    def trackevery(self):
+        return self._trackevery
+
+    @oversampling.setter
+    def trackevery(self, val):
+        if not isinstance(val, (int, float)):
+            self.log.error('trackevery has to be int of float.')
+        else:
+            self._trackevery = int(val)

@@ -197,7 +197,6 @@ class OptimizerLogic(GenericLogic):
         """
         # checking if refocus corresponding to crosshair or corresponding to initial_pos
 
-
         if isinstance(initial_pos, (np.ndarray,)) and initial_pos.size >= 3:
             self._initial_pos_x, self._initial_pos_y, self._initial_pos_z = initial_pos[0:3]
         elif isinstance(initial_pos, (list, tuple)) and len(initial_pos) >= 3:
@@ -207,7 +206,6 @@ class OptimizerLogic(GenericLogic):
             self._initial_pos_x, self._initial_pos_y, self._initial_pos_z = scpos
         else:
             pass  # TODO: throw error
-
         # Keep track of where the start_refocus was initiated
         self._caller_tag = caller_tag
 
@@ -338,7 +336,6 @@ class OptimizerLogic(GenericLogic):
                 self.stop_refocus()
                 self._sigScanNextXyLine.emit()
                 return
-
         lsx = self.xy_refocus_image[self._xy_scan_line_count, :, 0]
         lsy = self.xy_refocus_image[self._xy_scan_line_count, :, 1]
         lsz = self.xy_refocus_image[self._xy_scan_line_count, :, 2]
@@ -491,6 +488,11 @@ class OptimizerLogic(GenericLogic):
 
     def finish_refocus(self):
         """ Finishes up and releases hardware after the optimizer scans."""
+        if self._caller_tag == 'tracking':
+            print('I should be setting the position now')
+            print('The positions I will set are:')
+            print(self.optim_pos_x, self.optim_pos_y, self.optim_pos_z)
+            self._move_to_start_pos([self.optim_pos_x, self.optim_pos_y, self.optim_pos_z])
         self.kill_scanner()
 
         self.log.info(

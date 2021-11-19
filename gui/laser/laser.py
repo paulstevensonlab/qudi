@@ -74,12 +74,13 @@ class LaserGUI(GUIBase):
     sigPower = QtCore.Signal(float)
     sigCurrent = QtCore.Signal(float)
     sigCtrlMode = QtCore.Signal(ControlMode)
+    sigVoaVoltage = QtCore.Signal(float)
 
     def __init__(self, config, **kwargs):
         super().__init__(config=config, **kwargs)
 
     def on_activate(self):
-        """ Definition and initialisation of the GUI plus staring the measurement.
+        """ Definition and initialisation of the GUI plus starting the measurement.
         """
         self._laser_logic = self.laserlogic()
 
@@ -92,6 +93,10 @@ class LaserGUI(GUIBase):
         self._mw.setDockNestingEnabled(True)
         self._mw.actionReset_View.triggered.connect(self.restoreDefaultView)
 
+        # Load the VOA value, either the old one or the default.
+        self._mw.VoaVoltageDoubleSpinBox.setValue(self._laser_logic.voa_voltage)
+        # TODO: make this survive closing and re-opening the program
+
         # set up plot
         self._mw.plotWidget = pg.PlotWidget(
             axisItems={'bottom': TimeAxisItem(orientation='bottom')})
@@ -102,6 +107,7 @@ class LaserGUI(GUIBase):
         plot1.setLabel('bottom', 'Time', units=None)
         plot1.setLabel('right', 'Temperature', units='°C', color=palette.c3.name())
 
+        # TODO: add labels to differentiate the laser head temperature and the PSU temperature
         plot2 = pg.ViewBox()
         plot1.scene().addItem(plot2)
         plot1.getAxis('right').linkToView(plot2)
@@ -135,9 +141,11 @@ class LaserGUI(GUIBase):
         self.sigCurrent.connect(self._laser_logic.set_current)
         self.sigPower.connect(self._laser_logic.set_power)
         self.sigCtrlMode.connect(self._laser_logic.set_control_mode)
+        self.sigVoaVoltage.connect(self._laser_logic.set_voa_voltage)
         self._mw.controlModeButtonGroup.buttonClicked.connect(self.changeControlMode)
         self.sliderProxy = pg.SignalProxy(self._mw.setValueVerticalSlider.valueChanged, 0.1, 5, self.updateFromSlider)
         self._mw.setValueDoubleSpinBox.editingFinished.connect(self.updateFromSpinBox)
+        self._mw.VoaVoltageDoubleSpinBox.editingFinished.connect(self.updateFromVoaSpinBox)
         self._laser_logic.sigUpdate.connect(self.updateGui)
 
     def on_deactivate(self):
@@ -254,6 +262,7 @@ class LaserGUI(GUIBase):
                 self._laser_logic.laser_current,
                 self._laser_logic.laser_current_unit))
         self._mw.powerLabel.setText('{0:6.3f} W'.format(self._laser_logic.laser_power))
+        self._mw.voaLabel.setText('{0:6.3f} V'.format(self._laser_logic.voa_voltage))
         self._mw.extraLabel.setText(self._laser_logic.laser_extra)
         self.updateButtonsEnabled()
         for name, curve in self.curves.items():
@@ -269,6 +278,11 @@ class LaserGUI(GUIBase):
             self.sigPower.emit(self._mw.setValueDoubleSpinBox.value())
         elif cur and not pwr:
             self.sigCurrent.emit(self._mw.setValueDoubleSpinBox.value())
+
+    @QtCore.Slot()
+    def updateFromVoaSpinBox(self):
+        """ The user has changed the VOA voltage spinbox, emit the value. """
+        self.sigVoaVoltage.emit(self._mw.VoaVoltageDoubleSpinBox.value())
 
     @QtCore.Slot()
     def updateFromSlider(self):
