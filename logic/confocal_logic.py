@@ -653,10 +653,10 @@ class ConfocalLogic(GenericLogic):
 
         @param string tag: TODO
 
-        @param float x: if defined, changes to postion in x-direction (microns)
-        @param float y: if defined, changes to postion in y-direction (microns)
-        @param float z: if defined, changes to postion in z-direction (microns)
-        @param float a: if defined, changes to postion in a-direction (microns)
+        @param float x: if defined, changes to position in x-direction (microns)
+        @param float y: if defined, changes to position in y-direction (microns)
+        @param float z: if defined, changes to position in z-direction (microns)
+        @param float a: if defined, changes to position in a-direction (microns)
 
         @return int: error code (0:OK, -1:error)
         """
