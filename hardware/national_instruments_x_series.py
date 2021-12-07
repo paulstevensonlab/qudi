@@ -1093,11 +1093,11 @@ class NationalInstrumentsXSeries(Base, SlowCounterInterface, ConfocalScannerInte
         return self._AONwritten.value
 
     def _scanner_position_to_volt(self, positions=None):
-        """ Converts a set of position pixels to acutal voltages.
+        """ Converts a set of position pixels to actual voltages.
 
         @param float[][n] positions: array of n-part tuples defining the pixels
 
-        @return float[][n]: array of n-part tuples of corresponing voltages
+        @return float[][n]: array of n-part tuples of corresponding voltages
 
         The positions is typically a matrix like
             [[x_values], [y_values], [z_values], [a_values]]

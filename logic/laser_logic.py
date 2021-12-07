@@ -41,7 +41,8 @@ class LaserLogic(GenericLogic):
     scanner = Connector(interface='ConfocalScannerInterface')
     # Default to 0 V, which is zero attenuation.
     # https://www.thorlabs.com/drawings/51658de5420550b4-9D54B893-9B1F-818E-91293FC428044917/V450A-SpecSheet.pdf
-    voa_voltage = StatusVar(name='voa_voltage', default=0.0)
+    voa_voltage = StatusVar(name='voa_voltage', default=3.5)
+    #voa_voltage = ConfigOption('voa_voltage', 3.5)
     # TODO: why doesn't this value survive closing and re-opening?
 
     sigUpdate = QtCore.Signal()
@@ -155,7 +156,7 @@ class LaserLogic(GenericLogic):
 
     @QtCore.Slot(ControlMode)
     def set_control_mode(self, mode):
-        """ Change whether the laser is controlled by dioe current or output power. """
+        """ Change whether the laser is controlled by diode current or output power. """
         #print('set_control_mode', QtCore.QThread.currentThreadId())
         if mode in self._laser.allowed_control_modes():
             ctrl_mode = ControlMode.MIXED
