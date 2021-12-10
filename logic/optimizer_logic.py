@@ -108,7 +108,10 @@ class OptimizerLogic(GenericLogic):
         self._current_x = (self.x_range[0] + self.x_range[1]) / 2
         self._current_y = (self.y_range[0] + self.y_range[1]) / 2
         self._current_z = (self.z_range[0] + self.z_range[1]) / 2
-        self._current_a = 0.0
+        self.log.debug("optimizer_logic.py: on_activate(): NOT setting self.current_a = 0")
+        # self._current_a = 2.22222 # This doesn't seem to do anything. I wonder why?
+        # TODO: should I just delete this entirely?
+
 
         ###########################
         # Fit Params and Settings #

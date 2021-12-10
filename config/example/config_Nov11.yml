@@ -306,6 +306,7 @@ logic:
         connect:
             laser: 'laserquantum_laser'
             scanner: 'mynicard'
+            scannerlogic: 'scannerlogic'
 
     camera_logic:
         module.Class: 'camera_logic.CameraLogic'

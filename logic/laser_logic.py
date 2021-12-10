@@ -33,12 +33,16 @@ class LaserLogic(GenericLogic):
     """ Logic module agreggating multiple hardware switches.
     """
 
-    # waiting time between queries im milliseconds
+    # waiting time between queries in milliseconds
     laser = Connector(interface='SimpleLaserInterface')
     queryInterval = ConfigOption('query_interval', 200)
 
     # Need this to set the amplitude.
     scanner = Connector(interface='ConfocalScannerInterface')
+
+    # Need this to signal the change in the amplitude.
+    scannerlogic = Connector(interface='ConfocalLogic')
+
     # Default to 0 V, which is zero attenuation.
     # https://www.thorlabs.com/drawings/51658de5420550b4-9D54B893-9B1F-818E-91293FC428044917/V450A-SpecSheet.pdf
     voa_voltage = StatusVar(name='voa_voltage', default=3.5)
@@ -56,6 +60,7 @@ class LaserLogic(GenericLogic):
         self.data = {}
 
         # set up VOA
+        self._scanning_logic = self.scannerlogic()
         self._scanning_device = self.scanner()
         self.voa_voltage_range = self._scanning_device.get_position_range()[3] # TODO: check the bounds on this
 
@@ -197,6 +202,9 @@ class LaserLogic(GenericLogic):
         """ Set voltage of variable optical attenuator (VOA). """
         self._scanning_device.scanner_set_position(a=voltage)
         self.voa_voltage = voltage
+        # Send the signal so e.g. confocal can update its value.
+        self.log.debug("set_voa_voltage(): emitting new voltage to signal_voa_voltage_changed: '{}".format(voltage))
+        self._scanning_logic.signal_voa_voltage_changed.emit(self.voa_voltage)
 
     def get_voa_voltage(self):
         """ Get voltage of variable optical attenuator (VOA). """

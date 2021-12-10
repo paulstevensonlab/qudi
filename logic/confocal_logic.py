@@ -65,8 +65,9 @@ class ConfocalHistoryEntry(QtCore.QObject):
         self.current_x = (self.x_range[0] + self.x_range[1]) / 2
         self.current_y = (self.y_range[0] + self.y_range[1]) / 2
         self.current_z = (self.z_range[0] + self.z_range[1]) / 2
-        self.current_a = 2.717 # TODO: don't initialize this at all, read the value from somewhere
 
+        # self.current_a = 3.333333 # This doesn't seem to do anything, and we don't need it to.
+        # TODO: what is the best course of action here?
 
         # Sets the size of the image to the maximal scanning range
         self.image_x_range = self.x_range
@@ -278,6 +279,7 @@ class ConfocalLogic(GenericLogic):
     signal_tilt_correction_update = QtCore.Signal()
     signal_draw_figure_completed = QtCore.Signal()
     signal_position_changed = QtCore.Signal()
+    signal_voa_voltage_changed = QtCore.Signal(float)
 
     _signal_save_xy = QtCore.Signal(object, object)
     _signal_save_depth = QtCore.Signal(object, object)
@@ -349,6 +351,7 @@ class ConfocalLogic(GenericLogic):
         self._signal_save_depth.connect(self._save_depth_data, QtCore.Qt.QueuedConnection)
 
         self._change_position('activation')
+        self.signal_voa_voltage_changed.connect(self.update_voa_voltage, QtCore.Qt.QueuedConnection)
 
     def on_deactivate(self):
         """ Reverse steps of activation
@@ -650,6 +653,15 @@ class ConfocalLogic(GenericLogic):
 
         return 0
 
+    @QtCore.Slot(float)
+    def update_voa_voltage(self, new_voltage):
+        """ Update the voltage parameters of the class here to match whatever the new value is.
+        This way we won't clobber the old value when changing other positions.
+        """
+        self.log.debug("update_voa_voltage(): self._current_a = '{}'".format(self._current_a))
+        self.log.debug("update_voa_voltage(): new_voltage = '{}'".format(new_voltage))
+        self._current_a = new_voltage
+
     def set_position(self, tag, x=None, y=None, z=None, a=None):
         """Forwarding the desired new position from the GUI to the scanning device.
 
@@ -672,6 +684,9 @@ class ConfocalLogic(GenericLogic):
         if a is not None:
             self._current_a = a
 
+        self.log.debug("set_position(): a = '{}'".format(a))
+        self.log.debug("set_position(): self._current_a = '{}'".format(self._current_a))
+        self.log.debug("set_position(): tag = '{}'".format(tag))
 
         # Checks if the scanner is still running
         if self.module_state() == 'locked' or self._scanning_device.module_state() == 'locked':
@@ -689,12 +704,13 @@ class ConfocalLogic(GenericLogic):
         ch_array = ['x', 'y', 'z', 'a']
         pos_array = [self._current_x, self._current_y, self._current_z, self._current_a]
         pos_dict = {}
-
+        self.log.debug("_change_position(): tag = '{}'".format(tag))
 
         for i, ch in enumerate(self.get_scanner_axes()):
             pos_dict[ch_array[i]] = pos_array[i]
         self._scanning_device.scanner_set_position(**pos_dict)
         return 0
+
 
     def get_position(self):
         """ Get position from scanning device.
@@ -1276,3 +1292,4 @@ class ConfocalLogic(GenericLogic):
             self._change_position('history')
             self.signal_change_position.emit('history')
             self.signal_history_event.emit()
+
