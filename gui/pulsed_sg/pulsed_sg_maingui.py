@@ -113,6 +113,8 @@ class PulsedMeasurementGui(GUIBase):
         self.pulsedmasterlogic().sigMWStatusChanged.connect(self._update_mw_status,
                                                             QtCore.Qt.QueuedConnection)
 
+        self._mw.action_run_stop.triggered.connect(self.run_stop_odmr)
+
 
         # Set up signals which use logic layer functions
         self.sigCwMwOn.connect(self.pulsedmasterlogic().mw_cw_on, QtCore.Qt.QueuedConnection)
@@ -146,6 +148,31 @@ class PulsedMeasurementGui(GUIBase):
         self.uw_state = True # Start by declaring the MW on so the GUI immediately turns it off on startup
         self.toggle_mw_cw()
 
+        ## Setting up plotting
+        # -- this snippet is from the CW ODMR, highlights how to actually do the plotting. Need to flesh out the logic
+        # before this however.
+        # self.odmr_matrix_image = pg.ImageItem(
+        #     self._odmr_logic.odmr_plot_xy[:, self.display_channel],
+        #     axisOrder='row-major')
+        # self.odmr_matrix_image.setRect(QtCore.QRectF(
+        #     self._odmr_logic.mw_starts[0],
+        #     0,
+        #     self._odmr_logic.mw_stops[0] - self._odmr_logic.mw_starts[0],
+        #     self._odmr_logic.number_of_lines
+        # ))
+        #
+        # self.odmr_image = pg.PlotDataItem(self._odmr_logic.odmr_plot_x,
+        #                                   self._odmr_logic.odmr_plot_y[self.display_channel],
+        #                                   pen=pg.mkPen(palette.c1, style=QtCore.Qt.DotLine),
+        #                                   symbol='o',
+        #                                   symbolPen=palette.c1,
+        #                                   symbolBrush=palette.c1,
+        #                                   symbolSize=7)
+        #
+        # self.odmr_fit_image = pg.PlotDataItem(self._odmr_logic.odmr_fit_x,
+        #                                       self._odmr_logic.odmr_fit_y,
+        #                                       pen=pg.mkPen(palette.c2))
+
 
         return
 
@@ -176,7 +203,7 @@ class PulsedMeasurementGui(GUIBase):
 
 ## activate deactivate functions
     def _activate_main_window_ui(self):
-        # self._setup_toolbar()
+        self._setup_toolbar()
         # self.loaded_asset_updated(*self.pulsedmasterlogic().loaded_asset)
         return
 
@@ -201,6 +228,53 @@ class PulsedMeasurementGui(GUIBase):
             print('State is ' + str(self.uw_state) + ': Turning on')
             self.sigCwMwOn.emit()
         return
+
+## Main Window Related Methods
+
+    def _setup_toolbar(self):
+        # create all the needed control widgets on the fly
+        # this is the label for frequency
+        self._mw.freq_label = QtWidgets.QLabel(self._mw)
+        sizepolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred,
+                                           QtWidgets.QSizePolicy.Fixed)
+        sizepolicy.setHorizontalStretch(0)
+        sizepolicy.setVerticalStretch(0)
+        sizepolicy.setHeightForWidth(
+            self._mw.freq_label.sizePolicy().hasHeightForWidth())
+        self._mw.freq_label.setSizePolicy(sizepolicy)
+        self._mw.freq_label.setText('MW Frequency: ')
+
+        ## this is the spinbox for frequency
+        self._mw.mw_freq_spinbox = ScienDSpinBox()
+        self._mw.mw_freq_spinbox.setValue(2.876e9)
+        sizepolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred,
+                                          QtWidgets.QSizePolicy.Fixed)
+        self._mw.mw_freq_spinbox.setSizePolicy(sizepolicy)
+
+        # this is the label for power
+        self._mw.power_label = QtWidgets.QLabel(self._mw)
+        sizepolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred,
+                                           QtWidgets.QSizePolicy.Fixed)
+        sizepolicy.setHorizontalStretch(0)
+        sizepolicy.setVerticalStretch(0)
+        sizepolicy.setHeightForWidth(
+            self._mw.power_label.sizePolicy().hasHeightForWidth())
+        self._mw.power_label.setSizePolicy(sizepolicy)
+        self._mw.power_label.setText('MW Power: ')
+
+        ## this is the spinbox for power
+        self._mw.mw_power_spinbox = QtWidgets.QDoubleSpinBox()
+        self._mw.mw_power_spinbox.setValue(-30)
+        sizepolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred,
+                                           QtWidgets.QSizePolicy.Fixed)
+        self._mw.mw_power_spinbox.setSizePolicy(sizepolicy)
+
+        self._mw.control_ToolBar.addWidget(self._mw.freq_label)
+        self._mw.control_ToolBar.addWidget(self._mw.mw_freq_spinbox)
+        self._mw.control_ToolBar.addWidget(self._mw.power_label)
+        self._mw.control_ToolBar.addWidget(self._mw.mw_power_spinbox)
+        return
+
 
 ## GUI update
     def _update_do_checkboxes(self):
@@ -303,4 +377,8 @@ class PulsedMeasurementGui(GUIBase):
     def _update_mw_power(self):
         self._pst.mw_power_spinbox.setValue(self.uw_power)
         self._st_expt.mw_power_spinbox.setValue(self.uw_power)
+        return
+
+### other functions
+    def run_stop_odmr(self, is_checked):
         return
