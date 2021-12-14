@@ -68,13 +68,122 @@ class SDG6022X(Base, PulserInterface):
         instrument_identifier = self.query('*IDN?')
         self._BRAND, self._MODEL, self._SERIALNUMBER, self._FIRMWARE_VERSION = instrument_identifier.split(',')
 
-    def on_deactive(selfs):
+    def on_deactivate(self):
         try:
             self.awg.close()
         except BaseException as err:
             print("Unexpected error {}, {}".format(err, type(err)))
             self.log.error('Closing SDG6022X AWG connection using pyvisa failed.')
         self.log.info('Closed connection to SDG6022X AWG')
+
+    def get_constraints(self):
+        constraints = PulserConstraints()
+
+        # 1 μHz to 50 MHz in DDS mode (from manual, p.11)
+        # 1 μSa/s to 300 MSa/s in TrueArb mode (from manual, p.11)
+        constraints.sample_rate.min = 1e-6  # Hz
+        constraints.sample_rate.max = 300e6 # Hz
+        constraints.a_ch_amplitude.default = 300e6
+        # TODO: why does it seem the minimum is 2 mHz in TrueArb mode?
+        # TODO: what should be the step size?
+
+        # 20 Vpp maximum output (from manual)
+        constraints.a_ch_amplitude.min = 0      # Vpp
+        constraints.a_ch_amplitude.max = 20     # Vpp
+        constraints.a_ch_amplitude.step = 0.001 # Vpp
+        constraints.a_ch_amplitude.default = 4  # Vpp
+
+        """
+        The offset setting range is limited by the "Load" and "Amplitude/HighLevel"
+        settings.
+        """
+        # 10 V maximum offset magnitude (from manual testing)
+        constraints.a_ch_offset.min = -10 # V
+        constraints.a_ch_offset.min =  10 # V
+        # Note that the total voltage is limited to 20 V, apparently:
+        # 2*offset + amplitude < 20 V
+
+        # TODO: Does this even have digital outputs?
+        # If not, what should the constraints for these be set to?
+
+        """
+        TrueArb output mode allows creation of arbitrary
+        waveforms that contain from 2 to 20 Mpts.
+        p.37
+        """
+        # In practice, 20e6 samples will crash the AWG.
+        # TODO: what is the practical limit?
+        constraints.waveform_length.min = 2
+        constraints.waveform_length.max = 20e6
+        constraints.waveform_length.step = 1
+
+        # No sequence mode, only waveforms can be used
+        constraints.sequence_option = SequenceOption.NON
+
+    def get_status(self):
+        """ Retrieves the status of the pulsing hardware
+
+        @return (int, dict): tuple with an integer value of the current status and a corresponding
+                             dictionary containing status description for all the possible status
+                             variables of the pulse generator hardware.
+        """
+        current_status = instr.last_status.value
+
+        status_dic = {0: 'success'}
+        # TODO: add Status Codes:
+        # https://pyvisa.readthedocs.io/en/latest/api/constants.html?highlight=status%20code%20success#pyvisa.constants.StatusCode
+        # https://pyvisa.readthedocs.io/en/latest/_modules/pyvisa/constants.html#StatusCode
+
+        return current_status, status_dic
+
+    def get_sample_rate(self, channel=None):
+        """ Get the sample rate of the pulse generator hardware
+
+        @return float: The current sample rate of the device (in Hz)
+
+        Do not return a saved sample rate from an attribute, but instead retrieve the current
+        sample rate directly from the device.
+        """
+        if channel is None:
+            # If channel is unspecified, use channel #1.
+            # TODO: is there a better way?
+            response = self.query("C1:SRATE?")
+        elif channel == 1:
+            response = self.query("C1:SRATE?")
+        elif channel == 2:
+            response = self.query("C2:SRATE?")
+        else:
+            self.log.error("Invalid channel number: {}".format(channel))
+            return None
+        channel_label, sample_rate_info = response.split(':')
+        mode, truearb_or_dds, value_name, value, inter, hold = sample_rate_info.split(',')
+        def remove_suffix(input):
+            if input.endswith("Sa/s"):
+                return input[0:-len("Sa/s")]
+        value_number = remove_suffix(value)
+        sample_rate = float(value_number)
+        return sample_rate
+
+    def set_sample_rate(self, sample_rate, channel=None):
+        """ Set the sample rate of the pulse generator hardware.
+
+        @param float sample_rate: The sampling rate to be set (in Hz)
+
+        @return float: the sample rate returned from the device (in Hz).
+
+        Note: After setting the sampling rate of the device, use the actually set return value for
+              further processing.
+        """
+        if channel is None:
+            self.write('C1:SRATE VALUE,{}'.format(sample_rate))
+            self.write('C2:SRATE VALUE,{}'.format(sample_rate))
+        elif channel == 1:
+            self.write('C1:SRATE VALUE,{}'.format(sample_rate))
+        elif channel === 2:
+            self.write('C2:SRATE VALUE,{}'.format(sample_rate))
+        else:
+            self.log.error("Invalid channel number: {}".format(channel))
+        return self.get_sample_rate()
 
     def query(self, question):
         """ Asks the device a 'question' and returns an answer from it.
@@ -85,3 +194,16 @@ class SDG6022X(Base, PulserInterface):
         """
         answer = self.awg.query(question)
         return answer
+
+
+    def reset(self):
+        """ Reset the device.
+
+        @return int: error code (0:OK, -1:error)
+        """
+        self.write('*RST')
+        # TODO: is this necessary?
+        # self.write('*WAI')
+        # https://na.support.keysight.com/vna/help/latest/Programming/Learning_about_GPIB/Understanding_Command_Synchronization.htm#wai
+
+        return 0
