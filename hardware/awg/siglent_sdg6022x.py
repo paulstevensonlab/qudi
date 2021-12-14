@@ -28,7 +28,7 @@ from interface.pulser_interface import PulserInterface, PulserConstraints, Seque
 
 class SDG6022X(Base, PulserInterface):
     """
-    A hardware module for the SIGLENT SDG6022x for generating waveforms and
+    A hardware module for the SIGLENT SDG6022X for generating waveforms and
     sequences thereof.
 
     Based on keysight_m819x.py
@@ -62,12 +62,19 @@ class SDG6022X(Base, PulserInterface):
             print("Unexpected error {}, {}".format(err, type(err) ) )
             return err
 
-        if self.awg is not None:
-            # SCPI command return the company name, model number, serial
-            # number, and firmware version number.
-            # IDN = "identify"
-            instrument_identifier = self.query('*IDN?')
-            self._BRAND, self._MODEL, self._SERIALNUMBER, self._FIRMWARE_VERSION = instrument_identifier.split(',')
+        # SCPI command return the company name, model number, serial
+        # number, and firmware version number.
+        # IDN = "identify"
+        instrument_identifier = self.query('*IDN?')
+        self._BRAND, self._MODEL, self._SERIALNUMBER, self._FIRMWARE_VERSION = instrument_identifier.split(',')
+
+    def on_deactive(selfs):
+        try:
+            self.awg.close()
+        except BaseException as err:
+            print("Unexpected error {}, {}".format(err, type(err)))
+            self.log.error('Closing SDG6022X AWG connection using pyvisa failed.')
+        self.log.info('Closed connection to SDG6022X AWG')
 
     def query(self, question):
         """ Asks the device a 'question' and returns an answer from it.
