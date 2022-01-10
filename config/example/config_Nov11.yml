@@ -136,6 +136,8 @@ logic:
         connect:
             pulsegenerator: 'pulsestreamer'
             odmrlogic1: 'odmrlogic2'
+            fastcounter: 'fastcounter_timetagger'
+            savelogic: 'savelogic'
 
     sequencegeneratorlogic:
         module.Class: 'pulsed.sequence_generator_logic.SequenceGeneratorLogic'

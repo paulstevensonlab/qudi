@@ -178,65 +178,6 @@
      </property>
      <layout class="QGridLayout" name="gridLayout_11">
       <item row="0" column="0">
-       <layout class="QGridLayout" name="gridLayout_10">
-        <item row="0" column="1">
-         <widget class="ScienDSpinBox" name="mw_freq_spinbox">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="suffix">
-           <string>Hz</string>
-          </property>
-          <property name="decimals">
-           <number>6</number>
-          </property>
-          <property name="maximum">
-           <double>100000000000.000000000000000</double>
-          </property>
-          <property name="singleStep">
-           <double>0.100000000000000</double>
-          </property>
-          <property name="value">
-           <double>0.000000000000000</double>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="0">
-         <widget class="QLabel" name="label_18">
-          <property name="text">
-           <string>Microwave Frequency:</string>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="2">
-         <widget class="QLabel" name="label_19">
-          <property name="text">
-           <string>Power: </string>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="3">
-         <widget class="QDoubleSpinBox" name="mw_power_spinbox">
-          <property name="suffix">
-           <string>dBm</string>
-          </property>
-          <property name="decimals">
-           <number>5</number>
-          </property>
-          <property name="minimum">
-           <double>-1000.000000000000000</double>
-          </property>
-          <property name="maximum">
-           <double>100.000000000000000</double>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </item>
-      <item row="1" column="0">
        <layout class="QGridLayout" name="gridLayout_8">
         <item row="0" column="0">
          <widget class="QPushButton" name="mw_on_button">
@@ -406,28 +347,31 @@ p, li { white-space: pre-wrap; }
    <item row="3" column="5">
     <widget class="QGroupBox" name="groupBox_4">
      <property name="title">
-      <string>Timing Offsets</string>
+      <string>Timing Settings</string>
      </property>
      <layout class="QGridLayout" name="gridLayout_13">
       <item row="0" column="0">
        <layout class="QGridLayout" name="gridLayout_12">
-        <item row="0" column="1">
-         <widget class="QDoubleSpinBox" name="aom_delay_spinbox">
+        <item row="2" column="0">
+         <widget class="QLabel" name="label_18">
+          <property name="text">
+           <string>Green Pulse</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1">
+         <widget class="QDoubleSpinBox" name="mw_delay_spinbox">
           <property name="suffix">
            <string>ns</string>
+          </property>
+          <property name="minimum">
+           <double>-10000.000000000000000</double>
           </property>
           <property name="maximum">
            <double>10000.000000000000000</double>
           </property>
           <property name="singleStep">
            <double>0.500000000000000</double>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="0">
-         <widget class="QLabel" name="label_20">
-          <property name="text">
-           <string>AOM Delay: </string>
           </property>
          </widget>
         </item>
@@ -438,10 +382,20 @@ p, li { white-space: pre-wrap; }
           </property>
          </widget>
         </item>
-        <item row="1" column="1">
-         <widget class="QDoubleSpinBox" name="mw_delay_spinbox">
+        <item row="0" column="0">
+         <widget class="QLabel" name="label_20">
+          <property name="text">
+           <string>AOM Delay: </string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1">
+         <widget class="QDoubleSpinBox" name="aom_delay_spinbox">
           <property name="suffix">
            <string>ns</string>
+          </property>
+          <property name="minimum">
+           <double>-10000.000000000000000</double>
           </property>
           <property name="maximum">
            <double>10000.000000000000000</double>
@@ -451,9 +405,42 @@ p, li { white-space: pre-wrap; }
           </property>
          </widget>
         </item>
+        <item row="3" column="0">
+         <widget class="QLabel" name="label_19">
+          <property name="text">
+           <string>Integration Length</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="1">
+         <widget class="QDoubleSpinBox" name="green_pulse_spinbox">
+          <property name="suffix">
+           <string>ns</string>
+          </property>
+          <property name="maximum">
+           <double>100000.000000000000000</double>
+          </property>
+          <property name="value">
+           <double>3000.000000000000000</double>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="1">
+         <widget class="QDoubleSpinBox" name="integration_spinbox">
+          <property name="suffix">
+           <string>ns</string>
+          </property>
+          <property name="maximum">
+           <double>10000.000000000000000</double>
+          </property>
+          <property name="value">
+           <double>300.000000000000000</double>
+          </property>
+         </widget>
+        </item>
        </layout>
       </item>
-      <item row="1" column="0">
+      <item row="2" column="0">
        <spacer name="horizontalSpacer_2">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
@@ -466,18 +453,174 @@ p, li { white-space: pre-wrap; }
         </property>
        </spacer>
       </item>
+      <item row="1" column="0">
+       <layout class="QGridLayout" name="gridLayout_9">
+        <item row="2" column="0">
+         <widget class="QLabel" name="label_24">
+          <property name="text">
+           <string>Gate / Sync Channel</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="0">
+         <widget class="QLabel" name="label_23">
+          <property name="text">
+           <string>Microwave Switch Channel</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1">
+         <widget class="QComboBox" name="combo_aom">
+          <item>
+           <property name="text">
+            <string>DO 0</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>DO 1</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>DO 2</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>DO 3</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>DO 4</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>DO 5</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>DO 6</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>DO 7</string>
+           </property>
+          </item>
+         </widget>
+        </item>
+        <item row="0" column="0">
+         <widget class="QLabel" name="label_22">
+          <property name="text">
+           <string>AOM Channel</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1">
+         <widget class="QComboBox" name="combo_mw">
+          <property name="currentIndex">
+           <number>2</number>
+          </property>
+          <item>
+           <property name="text">
+            <string>DO 0</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>DO 1</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>DO 2</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>DO 3</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>DO 4</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>DO 5</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>DO 6</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>DO 7</string>
+           </property>
+          </item>
+         </widget>
+        </item>
+        <item row="2" column="1">
+         <widget class="QComboBox" name="combo_gate">
+          <property name="currentIndex">
+           <number>1</number>
+          </property>
+          <item>
+           <property name="text">
+            <string>DO 0</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>DO 1</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>DO 2</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>DO 3</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>DO 4</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>DO 5</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>DO 6</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>DO 7</string>
+           </property>
+          </item>
+         </widget>
+        </item>
+       </layout>
+      </item>
      </layout>
     </widget>
    </item>
   </layout>
  </widget>
- <customwidgets>
-  <customwidget>
-   <class>ScienDSpinBox</class>
-   <extends>QDoubleSpinBox</extends>
-   <header>qtwidgets.scientific_spinbox.h</header>
-  </customwidget>
- </customwidgets>
  <resources/>
  <connections/>
 </ui>

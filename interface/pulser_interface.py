@@ -167,6 +167,12 @@ class PulserInterface(metaclass=InterfaceMetaclass):
         pass
 
     @abstract_interface_method
+    def direct_write(self,sequence_dict):
+        """ Allows direct sequence writing from the main logic
+
+        @return: int: error code (0:OK, -1:error)"""
+
+    @abstract_interface_method
     def load_waveform(self, load_dict):
         """ Loads a waveform to the specified channel of the pulsing device.
 

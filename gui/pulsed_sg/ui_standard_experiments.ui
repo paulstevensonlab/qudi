@@ -6,115 +6,141 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1166</width>
-    <height>903</height>
+    <width>1131</width>
+    <height>1001</height>
    </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
   </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
-   <item row="3" column="5">
+   <item row="2" column="5">
     <widget class="QGroupBox" name="pulsed_odmr_box">
      <property name="title">
       <string>Pulsed ODMR</string>
      </property>
-     <layout class="QGridLayout" name="gridLayout_11"/>
-    </widget>
-   </item>
-   <item row="4" column="4">
-    <widget class="QGroupBox" name="ramsey_box">
-     <property name="title">
-      <string>Ramsey</string>
-     </property>
-     <layout class="QGridLayout" name="gridLayout_5"/>
-    </widget>
-   </item>
-   <item row="4" column="5">
-    <widget class="QGroupBox" name="hahn_echo_box">
-     <property name="title">
-      <string>Hahn Echo</string>
-     </property>
-     <layout class="QGridLayout" name="gridLayout_13"/>
-    </widget>
-   </item>
-   <item row="0" column="4" rowspan="2" colspan="2">
-    <widget class="QGroupBox" name="common_settings">
-     <property name="title">
-      <string>Common Settings</string>
-     </property>
-     <layout class="QHBoxLayout" name="horizontalLayout_2">
-      <item>
-       <layout class="QGridLayout" name="gridLayout_10">
-        <item row="0" column="1">
-         <widget class="ScienDSpinBox" name="mw_freq_spinbox">
+     <layout class="QGridLayout" name="gridLayout_8">
+      <item row="0" column="0">
+       <layout class="QGridLayout" name="gridLayout_7">
+        <item row="0" column="2">
+         <widget class="QLabel" name="label_17">
           <property name="sizePolicy">
-           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+           <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
           </property>
+          <property name="text">
+           <string> </string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="1">
+         <widget class="QDoubleSpinBox" name="spinbox_odmr_dwell">
+          <property name="suffix">
+           <string>s</string>
+          </property>
+          <property name="maximum">
+           <double>100000.000000000000000</double>
+          </property>
+          <property name="value">
+           <double>0.100000000000000</double>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1">
+         <widget class="ScienDSpinBox" name="spinbox_odmr_stop">
           <property name="suffix">
            <string>Hz</string>
           </property>
           <property name="decimals">
-           <number>6</number>
+           <number>5</number>
           </property>
           <property name="maximum">
            <double>100000000000.000000000000000</double>
           </property>
-          <property name="singleStep">
-           <double>0.100000000000000</double>
-          </property>
           <property name="value">
-           <double>0.000000000000000</double>
+           <double>2987000000.000000000000000</double>
           </property>
          </widget>
         </item>
-        <item row="0" column="0">
-         <widget class="QLabel" name="label_18">
-          <property name="text">
-           <string>Microwave Frequency:</string>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="2">
-         <widget class="QLabel" name="label_19">
-          <property name="text">
-           <string>Power: </string>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="3">
-         <widget class="QDoubleSpinBox" name="mw_power_spinbox">
+        <item row="0" column="1">
+         <widget class="ScienDSpinBox" name="spinbox_odmr_start">
           <property name="suffix">
-           <string>dBm</string>
+           <string>Hz</string>
           </property>
           <property name="decimals">
            <number>5</number>
           </property>
-          <property name="minimum">
-           <double>-1000.000000000000000</double>
-          </property>
           <property name="maximum">
-           <double>100.000000000000000</double>
+           <double>100000000000.000000000000000</double>
+          </property>
+          <property name="value">
+           <double>2987000000.000000000000000</double>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="0">
+         <widget class="QLabel" name="label_14">
+          <property name="text">
+           <string>Start:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="0">
+         <widget class="QLabel" name="label_15">
+          <property name="text">
+           <string>Stop</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="0">
+         <widget class="QLabel" name="label_16">
+          <property name="text">
+           <string>Dwell Time</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="3">
+         <widget class="QLabel" name="label_18">
+          <property name="text">
+           <string>Step</string>
           </property>
          </widget>
         </item>
         <item row="0" column="4">
-         <widget class="QLabel" name="label_22">
-          <property name="text">
-           <string>Pi Pulse Length</string>
+         <widget class="ScienDSpinBox" name="spinbox_odmr_step">
+          <property name="suffix">
+           <string>Hz</string>
+          </property>
+          <property name="decimals">
+           <number>2</number>
+          </property>
+          <property name="maximum">
+           <double>10000000.000000000000000</double>
+          </property>
+          <property name="value">
+           <double>1000000.000000000000000</double>
           </property>
          </widget>
         </item>
-        <item row="0" column="5">
-         <widget class="QDoubleSpinBox" name="pi_pulse_spinbox">
-          <property name="suffix">
-           <string>ns</string>
+        <item row="2" column="3">
+         <widget class="QLabel" name="label_19">
+          <property name="text">
+           <string>Repetitions</string>
           </property>
-          <property name="maximum">
-           <double>10000.000000000000000</double>
+         </widget>
+        </item>
+        <item row="2" column="4">
+         <widget class="QSpinBox" name="spinbox_odmr_rep">
+          <property name="minimum">
+           <number>1</number>
           </property>
          </widget>
         </item>
@@ -124,6 +150,129 @@
     </widget>
    </item>
    <item row="3" column="4">
+    <widget class="QGroupBox" name="ramsey_box">
+     <property name="title">
+      <string>Ramsey</string>
+     </property>
+     <layout class="QGridLayout" name="gridLayout_5">
+      <item row="0" column="0">
+       <layout class="QGridLayout" name="gridLayout_2">
+        <item row="0" column="0">
+         <widget class="QLabel" name="label_9">
+          <property name="text">
+           <string>Start:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="3">
+         <widget class="QLabel" name="label_13">
+          <property name="text">
+           <string>Repetitions</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="2">
+         <widget class="QLabel" name="label_11">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="text">
+           <string>   </string>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="4">
+         <widget class="QSpinBox" name="spinbox_ramsey_rep">
+          <property name="minimum">
+           <number>1</number>
+          </property>
+          <property name="maximum">
+           <number>1000</number>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1">
+         <widget class="QDoubleSpinBox" name="spinbox_ramsey_start">
+          <property name="suffix">
+           <string>ns</string>
+          </property>
+          <property name="maximum">
+           <double>10000.000000000000000</double>
+          </property>
+          <property name="value">
+           <double>10.000000000000000</double>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="0">
+         <widget class="QLabel" name="label_12">
+          <property name="text">
+           <string>Dwell Time</string>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="1">
+         <widget class="QDoubleSpinBox" name="spinbox_ramsey_dwell">
+          <property name="suffix">
+           <string>s</string>
+          </property>
+          <property name="maximum">
+           <double>100000.000000000000000</double>
+          </property>
+          <property name="value">
+           <double>0.100000000000000</double>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="3">
+         <widget class="QLabel" name="label_8">
+          <property name="text">
+           <string>Step:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1">
+         <widget class="QDoubleSpinBox" name="spinbox_ramsey_stop">
+          <property name="suffix">
+           <string>ns</string>
+          </property>
+          <property name="maximum">
+           <double>10000.000000000000000</double>
+          </property>
+          <property name="value">
+           <double>500.000000000000000</double>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="0">
+         <widget class="QLabel" name="label_10">
+          <property name="text">
+           <string>Stop:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="4">
+         <widget class="QDoubleSpinBox" name="spinbox_ramsey_step">
+          <property name="suffix">
+           <string>ns</string>
+          </property>
+          <property name="maximum">
+           <double>10000.000000000000000</double>
+          </property>
+          <property name="value">
+           <double>10.000000000000000</double>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item row="2" column="4">
     <widget class="QGroupBox" name="rabi_box">
      <property name="title">
       <string>Rabi</string>
@@ -131,37 +280,49 @@
      <layout class="QGridLayout" name="gridLayout_3">
       <item row="0" column="0">
        <layout class="QGridLayout" name="gridLayout_4">
-        <item row="2" column="1">
-         <widget class="QDoubleSpinBox" name="spinbox_rabi_step">
-          <property name="suffix">
-           <string>ns</string>
+        <item row="0" column="2">
+         <widget class="QLabel" name="label_4">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="text">
+           <string>   </string>
           </property>
          </widget>
         </item>
-        <item row="1" column="1">
-         <widget class="QDoubleSpinBox" name="spinbox_rabi_stop">
+        <item row="4" column="4">
+         <widget class="QSpinBox" name="spinbox_rabi_rep">
+          <property name="minimum">
+           <number>1</number>
+          </property>
+          <property name="value">
+           <number>1</number>
+          </property>
+         </widget>
+        </item>
+        <item row="4" column="1">
+         <widget class="QDoubleSpinBox" name="spinbox_rabi_dwell">
           <property name="suffix">
-           <string>ns</string>
+           <string>s</string>
+          </property>
+          <property name="minimum">
+           <double>0.000000000000000</double>
           </property>
           <property name="maximum">
-           <double>10000.000000000000000</double>
+           <double>1000000.000000000000000</double>
+          </property>
+          <property name="value">
+           <double>0.100000000000000</double>
           </property>
          </widget>
         </item>
         <item row="4" column="0">
          <widget class="QLabel" name="label_5">
           <property name="text">
-           <string>Dwell Time (per point)</string>
-          </property>
-         </widget>
-        </item>
-        <item row="4" column="1">
-         <widget class="QDoubleSpinBox" name="doubleSpinBox">
-          <property name="suffix">
-           <string>s</string>
-          </property>
-          <property name="maximum">
-           <double>1000000.000000000000000</double>
+           <string>Dwell Time</string>
           </property>
          </widget>
         </item>
@@ -177,48 +338,73 @@
           <property name="suffix">
            <string>ns</string>
           </property>
+          <property name="minimum">
+           <double>0.010000000000000</double>
+          </property>
           <property name="maximum">
            <double>10000.000000000000000</double>
           </property>
-         </widget>
-        </item>
-        <item row="3" column="0">
-         <widget class="QLabel" name="label_4">
-          <property name="text">
-           <string> </string>
+          <property name="singleStep">
+           <double>1.000000000000000</double>
+          </property>
+          <property name="value">
+           <double>1.000000000000000</double>
           </property>
          </widget>
         </item>
-        <item row="2" column="0">
+        <item row="4" column="3">
+         <widget class="QLabel" name="label_6">
+          <property name="text">
+           <string>Repetitions</string>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="1">
+         <widget class="QDoubleSpinBox" name="spinbox_rabi_stop">
+          <property name="suffix">
+           <string>ns</string>
+          </property>
+          <property name="maximum">
+           <double>100000.000000000000000</double>
+          </property>
+          <property name="value">
+           <double>1000.000000000000000</double>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="3">
          <widget class="QLabel" name="label_3">
           <property name="text">
            <string>Step:</string>
           </property>
          </widget>
         </item>
-        <item row="1" column="0">
+        <item row="0" column="4">
+         <widget class="QDoubleSpinBox" name="spinbox_rabi_step">
+          <property name="suffix">
+           <string>ns</string>
+          </property>
+          <property name="maximum">
+           <double>10000.000000000000000</double>
+          </property>
+          <property name="value">
+           <double>10.000000000000000</double>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="0">
          <widget class="QLabel" name="label_2">
           <property name="text">
            <string>Stop</string>
           </property>
          </widget>
         </item>
-        <item row="5" column="0">
-         <widget class="QLabel" name="label_6">
-          <property name="text">
-           <string>Number of Repititions</string>
-          </property>
-         </widget>
-        </item>
-        <item row="5" column="1">
-         <widget class="QSpinBox" name="spinBox"/>
-        </item>
        </layout>
       </item>
      </layout>
     </widget>
    </item>
-   <item row="5" column="4" colspan="2">
+   <item row="4" column="4" colspan="2">
     <widget class="QWidget" name="widget" native="true">
      <layout class="QHBoxLayout" name="horizontalLayout_4">
       <item>
@@ -232,7 +418,7 @@
         <property name="orientation">
          <enum>Qt::Vertical</enum>
         </property>
-        <widget class="PlotWidget" name="pulsed_PlotWidget_2">
+        <widget class="PlotWidget" name="pulsed_PlotWidget">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
            <horstretch>1</horstretch>
@@ -240,7 +426,7 @@
           </sizepolicy>
          </property>
         </widget>
-        <widget class="PlotWidget" name="pulsed_matrix_PlotWidget_2">
+        <widget class="PlotWidget" name="pulsed_matrix_PlotWidget">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
            <horstretch>1</horstretch>
@@ -250,35 +436,107 @@
         </widget>
        </widget>
       </item>
+      <item>
+       <widget class="QWidget" name="widget_3" native="true">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <layout class="QVBoxLayout" name="verticalLayout_2">
+         <item>
+          <widget class="QDoubleSpinBox" name="hi_perc_doubleSpinBox">
+           <property name="font">
+            <font>
+             <pointsize>8</pointsize>
+             <weight>50</weight>
+             <bold>false</bold>
+            </font>
+           </property>
+           <property name="suffix">
+            <string>%</string>
+           </property>
+           <property name="maximum">
+            <double>100.000000000000000</double>
+           </property>
+           <property name="value">
+            <double>100.000000000000000</double>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="PlotWidget" name="cb_plot_widget">
+           <property name="enabled">
+            <bool>true</bool>
+           </property>
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+             <horstretch>1</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QDoubleSpinBox" name="low_perc_doubleSpinBox">
+           <property name="suffix">
+            <string>%</string>
+           </property>
+           <property name="maximum">
+            <double>100.000000000000000</double>
+           </property>
+           <property name="value">
+            <double>1.000000000000000</double>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </item>
      </layout>
     </widget>
    </item>
-   <item row="2" column="4" colspan="2">
-    <widget class="QWidget" name="widget_2" native="true">
-     <layout class="QHBoxLayout" name="horizontalLayout_5">
+   <item row="3" column="5">
+    <widget class="QGroupBox" name="hahn_echo_box">
+     <property name="title">
+      <string>Hahn Echo</string>
+     </property>
+     <layout class="QGridLayout" name="gridLayout_13"/>
+    </widget>
+   </item>
+   <item row="0" column="4">
+    <widget class="QGroupBox" name="groupBox_2">
+     <property name="title">
+      <string>Experiment to Run</string>
+     </property>
+     <layout class="QHBoxLayout" name="horizontalLayout_2">
       <item>
-       <layout class="QHBoxLayout" name="horizontalLayout_6">
+       <widget class="QComboBox" name="combo_exptchoice">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
         <item>
-         <widget class="QToolButton" name="toolbutton_choose_expt">
-          <property name="text">
-           <string>Choose Experiment</string>
-          </property>
-          <property name="toolButtonStyle">
-           <enum>Qt::ToolButtonTextBesideIcon</enum>
-          </property>
-          <property name="arrowType">
-           <enum>Qt::DownArrow</enum>
-          </property>
-         </widget>
+         <property name="text">
+          <string>Rabi</string>
+         </property>
         </item>
         <item>
-         <widget class="QPushButton" name="button_start_st_expt">
-          <property name="text">
-           <string>Start Experiment</string>
-          </property>
-         </widget>
+         <property name="text">
+          <string>Pulsed ODMR</string>
+         </property>
         </item>
-       </layout>
+        <item>
+         <property name="text">
+          <string>Ramsey</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Hahn Echo</string>
+         </property>
+        </item>
+       </widget>
       </item>
      </layout>
     </widget>
@@ -287,14 +545,14 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>PlotWidget</class>
-   <extends>QGraphicsView</extends>
-   <header>pyqtgraph</header>
-  </customwidget>
-  <customwidget>
    <class>ScienDSpinBox</class>
    <extends>QDoubleSpinBox</extends>
    <header>qtwidgets.scientific_spinbox.h</header>
+  </customwidget>
+  <customwidget>
+   <class>PlotWidget</class>
+   <extends>QGraphicsView</extends>
+   <header>pyqtgraph</header>
   </customwidget>
  </customwidgets>
  <resources/>

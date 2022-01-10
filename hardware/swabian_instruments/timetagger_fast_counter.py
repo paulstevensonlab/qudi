@@ -166,6 +166,14 @@ class TimeTaggerFastCounter(Base, FastCounterInterface):
         self.statusvar = 2
         return 0
 
+    def measure_for(self,duration):
+        """ Duration is in seconds"""
+        # self.module_state.lock()
+        self.pulsed.startFor(int(1e12*duration),clear=True)
+        self.pulsed.waitUntilFinished()
+        return np.array(self.pulsed.getData(), dtype='int64')
+
+
     def stop_measure(self):
         """ Stop the fast counter. """
         if self.module_state() == 'locked':

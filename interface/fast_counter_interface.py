@@ -118,6 +118,11 @@ class FastCounterInterface(metaclass=InterfaceMetaclass):
         pass
 
     @abstract_interface_method
+    def measure_for(self,duration):
+        """ Duration is in seconds"""
+        pass
+
+    @abstract_interface_method
     def stop_measure(self):
         """ Stop the fast counter. """
         pass

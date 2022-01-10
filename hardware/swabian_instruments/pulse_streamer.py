@@ -256,6 +256,12 @@ class PulseStreamer(Base, PulserInterface):
         self.pulse_streamer.constant(self._laser_mw_on_state)
         return 0
 
+    def direct_write(self,sequence_dict):
+        self._seq = ps.Sequence()
+        for channel,rlesequence in zip(sequence_dict['Channels'],sequence_dict['Levels']):
+            self._seq.setDigital(channel,rlesequence)
+        return 0
+
     def set_continuous_out(self,state_list):
         high_inds_int = [int(i) for i in np.argwhere(np.asarray(state_list)>0)]
         self.pulse_streamer.constant((high_inds_int, 0., 0.))
