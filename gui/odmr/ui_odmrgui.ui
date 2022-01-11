@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1234</width>
-    <height>611</height>
+    <width>1424</width>
+    <height>641</height>
    </rect>
   </property>
   <property name="contextMenuPolicy">
@@ -213,8 +213,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1234</width>
-     <height>24</height>
+     <width>1424</width>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu_File">
@@ -698,6 +698,12 @@
    <property name="checkable">
     <bool>true</bool>
    </property>
+   <property name="checked">
+    <bool>false</bool>
+   </property>
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
    <property name="icon">
     <iconset>
      <normaloff>../../artwork/icons/qudiTheme/22x22/start-counter.png</normaloff>
@@ -756,14 +762,14 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>PlotWidget</class>
-   <extends>QGraphicsView</extends>
-   <header>pyqtgraph</header>
-  </customwidget>
-  <customwidget>
    <class>ScienDSpinBox</class>
    <extends>QDoubleSpinBox</extends>
    <header>qtwidgets.scientific_spinbox.h</header>
+  </customwidget>
+  <customwidget>
+   <class>PlotWidget</class>
+   <extends>QGraphicsView</extends>
+   <header>pyqtgraph</header>
   </customwidget>
   <customwidget>
    <class>FitSettingsComboBox</class>

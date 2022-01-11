@@ -203,11 +203,9 @@
     <property name="title">
      <string>Se&amp;ttings</string>
     </property>
-    <addaction name="action_Predefined_Methods_Config"/>
     <addaction name="separator"/>
-    <addaction name="action_Settings_Analysis"/>
     <addaction name="action_FitSettings"/>
-    <addaction name="action_Settings_Generator"/>
+    <addaction name="actionTracking_Settings"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuSettings"/>
@@ -358,6 +356,11 @@
    </property>
    <property name="text">
     <string>Pulse Generator Settings</string>
+   </property>
+  </action>
+  <action name="actionTracking_Settings">
+   <property name="text">
+    <string>Tracking Settings</string>
    </property>
   </action>
  </widget>

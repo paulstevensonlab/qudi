@@ -7,7 +7,7 @@
 #         the config line must the form package.module.Class.ClassName
 global:
     # list of modules to load when starting
-    startup: ['man', 'tray', 'tasklogic']
+    startup: ['man', 'tray', 'tasklogic',]
 
     module_server:
         address: 'localhost'
@@ -40,12 +40,12 @@ hardware:
             - [-52.93e-6, 52.93e-6]
             - [-79.82e-6, 79.82e-6]
             - [-50e-6, 50e-6]
-            - [-10, 10]
+            - [0, 5] # actual limits -10 to +10
         scanner_voltage_ranges:
             - [-0.2, 1.3]
             - [0.2, 2.34]
             - [-2, 8]
-            - [-10, 10]
+            - [0, 5] # changed for VOA limits
         default_samples_number: 10
         default_clock_frequency: 100
         default_scanner_clock_frequency: 100
@@ -342,7 +342,12 @@ gui:
         image_y_padding: 0.02
         image_z_padding: 0.02
         default_meter_prefix: 'u'
-        
+
+    laser:
+        module.Class: 'laser.laser.LaserGUI'
+        connect:
+            laserlogic: 'laserlogic'
+    
     timeseries:
         module.Class: 'time_series.time_series_gui.TimeSeriesGui'
         connect:
@@ -361,11 +366,6 @@ gui:
             savelogic: 'savelogic'
 
     pulsedmeasurement:
-        module.Class: 'pulsed.pulsed_maingui.PulsedMeasurementGui'
-        connect:
-            pulsedmasterlogic: 'pulsedmasterlogic'
-    
-    pulsedmeasurement2:
         module.Class: 'pulsed_sg.pulsed_sg_maingui.PulsedMeasurementGui'
         connect:
             pulsedmasterlogic: 'pulsedmasterlogic2'
@@ -380,11 +380,6 @@ gui:
         module.Class: 'pidgui.pidgui.PIDGui'
         connect:
             pidlogic: 'pidlogic'
-
-    laser:
-        module.Class: 'laser.laser.LaserGUI'
-        connect:
-            laserlogic: 'laserlogic'
 
     laserscanner:
         module.Class: 'laserscanner.laserscannergui.VoltScanGui'
