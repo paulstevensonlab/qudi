@@ -472,6 +472,7 @@ class PulsedMasterLogic(GenericLogic):
         return
 
     def mw_sweep_on(self,params):
+        self.uw_power = self.odmrlogic1().cw_mw_power
         mw_start = params[0]
         mw_stop = params[1]
         mw_step = params[2]
