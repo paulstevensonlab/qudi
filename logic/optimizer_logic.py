@@ -428,7 +428,7 @@ class OptimizerLogic(GenericLogic):
 
     def do_z_optimization(self):
         """ Do the z axis optimization."""
-        # z scaning
+        # z scanning
         self._scan_z_line()
 
         # z-fit
