@@ -87,6 +87,7 @@ class ODMRGui(GUIBase):
     sigClockFreqChanged = QtCore.Signal(float)
     sigOversamplingChanged = QtCore.Signal(int)
     sigLockInChanged = QtCore.Signal(bool)
+    sigReferenceChanged = QtCore.Signal(bool)
     sigAutotrackChanged = QtCore.Signal(bool)
     sigTrackeveryChanged = QtCore.Signal(int)
     sigFitChanged = QtCore.Signal(str)
@@ -334,6 +335,7 @@ class ODMRGui(GUIBase):
         self._sd.clock_frequency_DoubleSpinBox.setValue(self._odmr_logic.clock_frequency)
         self._sd.oversampling_SpinBox.setValue(self._odmr_logic.oversampling)
         self._sd.lock_in_CheckBox.setChecked(self._odmr_logic.lock_in)
+        self._sd.checkbox_reference.setChecked(self._odmr_logic.referenced)
         self._sd.autotrack_CheckBox.setChecked(self._odmr_logic.autotrack)
         self._sd.autotrack_SpinBox.setValue(self._odmr_logic.trackevery)
 
@@ -390,6 +392,7 @@ class ODMRGui(GUIBase):
                                          QtCore.Qt.QueuedConnection)
         self.sigOversamplingChanged.connect(self._odmr_logic.set_oversampling, QtCore.Qt.QueuedConnection)
         self.sigLockInChanged.connect(self._odmr_logic.set_lock_in, QtCore.Qt.QueuedConnection)
+        self.sigReferenceChanged.connect(self._odmr_logic.set_referenced, QtCore.Qt.QueuedConnection)
         self.sigAutotrackChanged.connect(self._odmr_logic.set_autotrack, QtCore.Qt.QueuedConnection)
         self.sigTrackeveryChanged.connect(self._odmr_logic.set_trackevery, QtCore.Qt.QueuedConnection)
         self.sigSaveMeasurement.connect(self._odmr_logic.save_odmr_data, QtCore.Qt.QueuedConnection)
@@ -446,6 +449,7 @@ class ODMRGui(GUIBase):
         self.sigClockFreqChanged.disconnect()
         self.sigOversamplingChanged.disconnect()
         self.sigLockInChanged.disconnect()
+        self.sigReferenceChanged.disconnect()
         self.sigSaveMeasurement.disconnect()
         self.sigAverageLinesChanged.disconnect()
         self._mw.odmr_cb_manual_RadioButton.clicked.disconnect()
@@ -684,6 +688,7 @@ class ODMRGui(GUIBase):
             self._sd.clock_frequency_DoubleSpinBox.setEnabled(False)
             self._sd.oversampling_SpinBox.setEnabled(False)
             self._sd.lock_in_CheckBox.setEnabled(False)
+            self._sd.checkbox_reference.setEnabled(False)
             self.sigStartOdmrScan.emit()
         else:
             self._mw.action_run_stop.setEnabled(False)
@@ -710,6 +715,7 @@ class ODMRGui(GUIBase):
             self._sd.clock_frequency_DoubleSpinBox.setEnabled(False)
             self._sd.oversampling_SpinBox.setEnabled(False)
             self._sd.lock_in_CheckBox.setEnabled(False)
+            self._sd.checkbox_reference.setEnabled(False)
             self.sigContinueOdmrScan.emit()
         else:
             self._mw.action_run_stop.setEnabled(False)
@@ -764,6 +770,7 @@ class ODMRGui(GUIBase):
                 self._sd.clock_frequency_DoubleSpinBox.setEnabled(False)
                 self._sd.oversampling_SpinBox.setEnabled(False)
                 self._sd.lock_in_CheckBox.setEnabled(False)
+                self._sd.checkbox_reference.setEnabled(False)
                 self._mw.action_run_stop.setChecked(True)
                 self._mw.action_resume_odmr.setChecked(True)
                 self._mw.action_toggle_cw.setChecked(False)
@@ -782,6 +789,7 @@ class ODMRGui(GUIBase):
                 self._sd.clock_frequency_DoubleSpinBox.setEnabled(True)
                 self._sd.oversampling_SpinBox.setEnabled(True)
                 self._sd.lock_in_CheckBox.setEnabled(True)
+                self._sd.checkbox_reference.setEnabled(True)
                 self._mw.action_run_stop.setChecked(False)
                 self._mw.action_resume_odmr.setChecked(False)
                 self._mw.action_toggle_cw.setChecked(True)
@@ -806,6 +814,7 @@ class ODMRGui(GUIBase):
             self._sd.clock_frequency_DoubleSpinBox.setEnabled(True)
             self._sd.oversampling_SpinBox.setEnabled(True)
             self._sd.lock_in_CheckBox.setEnabled(True)
+            self._sd.checkbox_reference.setEnabled(True)
             self._mw.action_run_stop.setChecked(False)
             self._mw.action_resume_odmr.setChecked(False)
             self._mw.action_toggle_cw.setChecked(False)
@@ -925,8 +934,10 @@ class ODMRGui(GUIBase):
         lock_in = self._sd.lock_in_CheckBox.isChecked()
         autotrack = self._sd.autotrack_CheckBox.isChecked()
         trackevery = self._sd.autotrack_SpinBox.value()
+        reference = self._sd.checkbox_reference.isChecked()
         self.sigOversamplingChanged.emit(oversampling)
         self.sigLockInChanged.emit(lock_in)
+        self.sigReferenceChanged.emit(reference)
         self.sigClockFreqChanged.emit(clock_frequency)
         self.sigNumberOfLinesChanged.emit(number_of_lines)
         self.sigAutotrackChanged.emit(autotrack)
@@ -939,6 +950,7 @@ class ODMRGui(GUIBase):
         self._sd.clock_frequency_DoubleSpinBox.setValue(self._odmr_logic.clock_frequency)
         self._sd.oversampling_SpinBox.setValue(self._odmr_logic.oversampling)
         self._sd.lock_in_CheckBox.setChecked(self._odmr_logic.lock_in)
+        self._sd.checkbox_reference.setChecked(self._odmr_logic.referenced)
         self._sd.autotrack_CheckBox.setChecked(self._odmr_logic.autotrack)
         self._sd.autotrack_SpinBox.setValue(self._odmr_logic.trackevery)
         return
@@ -1060,6 +1072,12 @@ class ODMRGui(GUIBase):
             self._sd.lock_in_CheckBox.blockSignals(True)
             self._sd.lock_in_CheckBox.setChecked(param)
             self._sd.lock_in_CheckBox.blockSignals(False)
+
+        param = param_dict.get('reference')
+        if param is not None:
+            self._sd.checkbox_reference.blockSignals(True)
+            self._sd.checkbox_reference.setChecked(param)
+            self._sd.checkbox_reference.blockSignals(False)
 
         param = param_dict.get('autotrack')
         if param is not None:

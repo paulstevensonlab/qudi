@@ -69,6 +69,7 @@ class ODMRLogic(GenericLogic):
     lines_to_average = StatusVar('lines_to_average', 0)
     _oversampling = StatusVar('oversampling', default=10)
     _lock_in_active = StatusVar('lock_in_active', default=False)
+    referenced = StatusVar('referenced',default=True)
     _autotrack = StatusVar('autotrack',default=True)
     _trackevery = StatusVar('trackevery',default=5)
 
@@ -357,6 +358,10 @@ class ODMRLogic(GenericLogic):
     def set_lock_in(self, active):
         self.lock_in = active
         return self.lock_in
+
+    def set_referenced(self, active):
+        self.referenced = active
+        return self.referenced
 # new stuff starts here
     @property
     def autotrack(self):
@@ -826,7 +831,11 @@ class ODMRLogic(GenericLogic):
             self.reset_sweep()
 
             # Acquire count data
-            error, new_counts = self._odmr_counter.count_odmr(length=self.odmr_plot_x.size)
+            if self.referenced:
+                error, new_counts = self._odmr_counter.count_odmr_ref(length=self.odmr_plot_x.size)
+            else:
+                error, new_counts = self._odmr_counter.count_odmr(length=self.odmr_plot_x.size)
+
 
             if error:
                 self.stopRequested = True
