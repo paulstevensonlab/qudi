@@ -849,13 +849,14 @@ class ConfocalGui(GUIBase):
         Also, if the refocus was initiated here in confocalgui then we need to handle the
         "returned" optimal position.
         """
+
         if caller_tag == 'confocalgui':
             self._scanning_logic.set_position(
                 'optimizer',
                 x=optimal_pos[0],
                 y=optimal_pos[1],
                 z=optimal_pos[2],
-                a=0.0
+                a=optimal_pos[3]
             )
         self.enable_scan_actions()
 
