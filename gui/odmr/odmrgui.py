@@ -1165,7 +1165,7 @@ class ODMRGui(GUIBase):
         return
 
     def save_data(self):
-        """ Save the sum plot, the scan marix plot and the scan data """
+        """ Save the sum plot, the scan matrix plot and the scan data """
         filetag = self._mw.save_tag_LineEdit.text()
         cb_range = self.get_matrix_cb_range()
 
