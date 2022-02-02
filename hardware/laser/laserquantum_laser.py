@@ -281,7 +281,16 @@ class LaserQuantumLaser(Base, SimpleLaserInterface):
 
         @return float: laser head temperature
         """
-        return float(self.inst.query('LASTEMP?').split('C')[0])
+        response = self.inst.query('LASTEMP?')
+        # should be e.g. ' 30.071C'
+        if response.endswith('C'):
+            temperature_str, blank = response.split('C')
+            if blank != '':
+                raise ValueError("invalid 'LASTEMP?' response: '{}'".format(response))
+            temperature = float(temperature_str)
+            return temperature
+        else:
+            raise ValueError("invalid 'LASTEMP?' response: '{}'".format(response))
 
     def get_temperatures(self):
         """ Get all available temperatures.
