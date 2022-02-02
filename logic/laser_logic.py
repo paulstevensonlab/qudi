@@ -127,9 +127,17 @@ class LaserLogic(GenericLogic):
 
             for k, v in self.laser_temps.items():
                 self.data[k][-1] = v
-        except:
+        except ValueError as e:
+            import traceback
+            self.log.warning(traceback.format_exc())
+            # Traceback is better than just self.log.warning(e)
             qi = 3000
-            self.log.exception("Exception in laser status loop, throttling refresh rate.")
+            self.log.warning("ValueError in laser status loop, throttling refresh rate.")
+        except pyvisa.errors.VisaIOError as e:
+            import traceback
+            self.log.warning(traceback.format_exc())
+            qi = 3000
+            self.log.warning("pyvisa.errors.VisaIOError in laser status loop, throttling refresh rate.")
 
         self.queryTimer.start(qi)
         self.sigUpdate.emit()
