@@ -133,11 +133,12 @@ class LaserLogic(GenericLogic):
             # Traceback is better than just self.log.warning(e)
             qi = 3000
             self.log.warning("ValueError in laser status loop, throttling refresh rate.")
-        except pyvisa.errors.VisaIOError as e:
+        except Exception as e:
+            # Catch other exceptions like pyvisa.errors.VisaIOError
             import traceback
             self.log.warning(traceback.format_exc())
             qi = 3000
-            self.log.warning("pyvisa.errors.VisaIOError in laser status loop, throttling refresh rate.")
+            self.log.warning("Exception in laser status loop, throttling refresh rate.")
 
         self.queryTimer.start(qi)
         self.sigUpdate.emit()
