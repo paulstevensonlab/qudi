@@ -172,16 +172,12 @@ class LaserQuantumLaser(Base, SimpleLaserInterface):
         """
         if self.psu == PSUTypes.FPU:
             answer = self.inst.query('SETPOWER?')
-            try:
-                if "mW" in answer:
-                    return float(answer.split('mW')[0]) / 1000
-                elif 'W' in answer:
-                    return float(answer.split('W')[0])
-                else:
-                    return float(answer)
-            except ValueError:
-                self.log.exception("Answer was {0}.".format(answer))
-                return -1
+            if "mW" in answer:
+                return float(answer.split('mW')[0]) / 1000
+            elif 'W' in answer:
+                return float(answer.split('W')[0])
+            else:
+                return float(answer)
         else:
             return self.get_power()
 
