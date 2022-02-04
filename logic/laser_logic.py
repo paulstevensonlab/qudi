@@ -46,8 +46,6 @@ class LaserLogic(GenericLogic):
     # Default to 0 V, which is zero attenuation.
     # https://www.thorlabs.com/drawings/51658de5420550b4-9D54B893-9B1F-818E-91293FC428044917/V450A-SpecSheet.pdf
     voa_voltage = StatusVar(name='voa_voltage', default=3.5)
-    #voa_voltage = ConfigOption('voa_voltage', 3.5)
-    # TODO: why doesn't this value survive closing and re-opening?
 
     sigUpdate = QtCore.Signal()
 
