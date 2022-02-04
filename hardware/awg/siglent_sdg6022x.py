@@ -36,7 +36,7 @@ class SDG6022X(Base, PulserInterface):
     Nathaniel Beaver, 2021-12-13
     """
 
-    _visa_address = ConfigOption(name='awg_visa_address', default='TCPIP0::129.10.130.63::INSTR', missing='error')
+    _visa_address = ConfigOption(name='awg_visa_address', default='TCPIP0::129.10.128.231::INSTR', missing='error')
 
     def __init__(self, config, **kwargs):
         super().__init__(config=config, **kwargs)
