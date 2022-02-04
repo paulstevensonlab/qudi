@@ -196,6 +196,11 @@ class SDG6022X(Base, PulserInterface):
         answer = self.awg.query(question)
         return answer
 
+    def get_loaded_assets(self):
+        # Use query('STL? USER')
+        # Example output:
+        # 'STL WVNM,wave1,wave2,wave3,wave4'
+        raise NotImplementedError
 
     def reset(self):
         """ Reset the device.
