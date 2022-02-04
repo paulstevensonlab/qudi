@@ -35,7 +35,8 @@ class LaserLogic(GenericLogic):
 
     # waiting time between queries in milliseconds
     laser = Connector(interface='SimpleLaserInterface')
-    queryInterval = ConfigOption('query_interval', 200)
+    queryInterval = ConfigOption('query_interval', 1000)
+    # TODO: make this changeable from within the GUI
 
     # Need this to set the amplitude.
     scanner = Connector(interface='ConfocalScannerInterface')
