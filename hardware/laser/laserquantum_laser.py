@@ -146,16 +146,12 @@ class LaserQuantumLaser(Base, SimpleLaserInterface):
             @return float: laser power in watts
         """
         answer = self.inst.query('POWER?')
-        try:
-            if "mW" in answer:
-                return float(answer.split('mW')[0])/1000
-            elif 'W' in answer:
-                return float(answer.split('W')[0])
-            else:
-                return float(answer)
-        except ValueError:
-            self.log.exception("Answer was {0}.".format(answer))
-            return -1
+        if "mW" in answer:
+            return float(answer.split('mW')[0])/1000
+        elif 'W' in answer:
+            return float(answer.split('W')[0])
+        else:
+            return float(answer)
 
     def get_power_setpoint(self):
         """ Get the laser power setpoint.
