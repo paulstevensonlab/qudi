@@ -175,6 +175,7 @@ class SDG6022X(Base, PulserInterface):
               further processing.
         """
         if channel is None:
+            # If not specified, set both channels.
             self.write('C1:SRATE VALUE,{}'.format(sample_rate))
             self.write('C2:SRATE VALUE,{}'.format(sample_rate))
         elif channel == 1:
