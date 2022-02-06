@@ -58,6 +58,7 @@ class PulsedMasterLogic(GenericLogic):
     fastcounter = Connector(interface='FastCounterInterface')
     odmrlogic1 = Connector(interface='ODMRLogic')
     savelogic = Connector(interface='SaveLogic')
+    optimiserlogic = Connector(interface='OptimizerLogic')
 
     do_channel_states = StatusVar('DO channel states', [0,0,0,0,0,0,0,0])
     pulselengths = StatusVar('Pulse Timing Parameters',[700,10,3000,300]) # aom delay, microwave delay, aom pulse length, integration time, all in nanoseconds
@@ -69,6 +70,7 @@ class PulsedMasterLogic(GenericLogic):
     pi_pulse = StatusVar('Pi Pulse Time',100.)
     autosave = StatusVar('Pulsed Autosave',False)
     _autotrack = StatusVar('autotrack', default=True)
+    _trackevery = StatusVar('trackevery',default=3)
 
     # Define signals
     sigParameterUpdated = QtCore.Signal(dict)
@@ -187,6 +189,11 @@ class PulsedMasterLogic(GenericLogic):
     def set_autosave(self,saveon):
         self.autosave = saveon
         return
+
+    def set_autotrack(self,trackon,tracknumber):
+        self._autotrack = trackon
+        self._trackevery = tracknumber
+
 
     def set_timing(self,pulselengths=None,pulseconfigs=None):
         if pulselengths is not None:
@@ -308,7 +315,16 @@ class PulsedMasterLogic(GenericLogic):
                 self.module_state.unlock()
                 return
 
-            # need a loop here which loads sequences and acquires countrates
+            if self._autotrack:
+                if np.mod(self.elapsed_sweeps, self._trackevery) == 0:
+                    self.module_state.unlock()
+                    if self.optimiserlogic().module_state() == 'idle':
+                        self.optimiserlogic().start_refocus(caller_tag='tracking')
+                        time.sleep(10) # note - we really should replace this with something which waits for the signal from the optimizer
+                    self.module_state.lock()
+                    #do some tracking
+
+                #do some tracking
 
 
             st_inds = [0,int(self.pulselengths[3])]

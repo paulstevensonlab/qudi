@@ -66,6 +66,15 @@ class PulseStreamerTab(QtWidgets.QWidget):
         super().__init__()
         uic.loadUi(ui_file, self)
 
+class CWODMRTab(QtWidgets.QWidget):
+    def __init__(self):
+        # Get the path to the *.ui file
+        this_dir = os.path.dirname(__file__)
+        ui_file = os.path.join(this_dir, 'ui_cwodmr.ui')
+        # Load it
+        super().__init__()
+        uic.loadUi(ui_file, self)
+
 class StandardExperimentsTab(QtWidgets.QWidget):
     def __init__(self):
         # Get the path to the *.ui file
@@ -89,6 +98,7 @@ class PulsedMeasurementGui(GUIBase):
     sigPiPulseChanged = QtCore.Signal(float)
     sigExptChanged = QtCore.Signal(str)
     sigSaveChanged = QtCore.Signal(bool)
+    sigTrackChanged = QtCore.Signal(bool,int)
     sigSaveMeasurement = QtCore.Signal(str, list, list)
 
     def __init__(self, config, **kwargs):
@@ -112,11 +122,13 @@ class PulsedMeasurementGui(GUIBase):
 
         self._mw = PulsedMeasurementMainWindow()
         self._pst = PulseStreamerTab()
+        self._cwodmr = CWODMRTab()
         self._st_expt = StandardExperimentsTab()
 
 
         self._mw.tabWidget.addTab(self._pst, 'PulseStreamer Controls')
-        self._mw.tabWidget.addTab(self._st_expt, 'Standard Experiments')
+        self._cw.tabWidget.addTab(self._cwodmr,'CW ODMR')
+        self._mw.tabWidget.addTab(self._st_expt, 'Standard Pulsed Experiments')
 
         self._activate_main_window_ui()
 
@@ -166,6 +178,8 @@ class PulsedMeasurementGui(GUIBase):
                                           QtCore.Qt.QueuedConnection)
         self.sigSaveChanged.connect(self._pulsed_logic.set_autosave,
                                     QtCore.Qt.QueuedConnection)
+        self.sigTrackChanged.connect(self._pulsed_logic.set_autotrack,
+                                    QtCore.Qt.QueuedConnection)
 
 
         # user input signals
@@ -175,6 +189,8 @@ class PulsedMeasurementGui(GUIBase):
 
         self._st_expt.combo_exptchoice.currentIndexChanged.connect(self.change_exptchoice)
         self._mw.autosave_checkBox.stateChanged.connect(self.change_autosave)
+        self._mw.autotrack_checkBox.stateChanged.connect(self.change_autotrack)
+        self._mw.autotrack_spinBox.valueChanged.connect(self.change_autotrack)
 
         # checking instrument status
         self.streamer_status = self._pulsed_logic.get_streamer_status()
@@ -190,6 +206,10 @@ class PulsedMeasurementGui(GUIBase):
         # setting constant channels
         self.autosave = self._pulsed_logic.autosave
         self._update_save()
+
+        self.autotrack = self._pulsed_logic._autotrack
+        self.trackevery = self._pulsed_logic._trackevery
+        self._update_track()
 
         self.channel_states = self._pulsed_logic.do_channel_states
         self._update_do_checkboxes()
@@ -572,6 +592,12 @@ class PulsedMeasurementGui(GUIBase):
         self.sigSaveChanged.emit(self.autosave)
         return
 
+    def change_autotrack(self):
+        self.autotrack = self._mw.autotrack_checkBox.isChecked()
+        self.trackevery = self._mw.autotrack_spinBox.value()
+        self.sigTrackChanged.emit(self.autotrack,int(self.trackevery))
+        return
+
     def _update_timingvals(self):
         self.pulselengths[0] = self._pst.aom_delay_spinbox.value()
         self.pulselengths[1] = self._pst.mw_delay_spinbox.value()
@@ -619,6 +645,11 @@ class PulsedMeasurementGui(GUIBase):
 
     def _update_save(self):
         self._mw.autosave_checkBox.setChecked(self.autosave)
+        return
+
+    def _update_track(self):
+        self._mw.autotrack_checkBox.setChecked(self.autotrack)
+        self._mw.autotrack_spinBox.setValue(self.trackevery)
         return
 
     #########################################
