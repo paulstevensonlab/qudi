@@ -127,7 +127,7 @@ class PulsedMeasurementGui(GUIBase):
 
 
         self._mw.tabWidget.addTab(self._pst, 'PulseStreamer Controls')
-        self._cw.tabWidget.addTab(self._cwodmr,'CW ODMR')
+        self._mw.tabWidget.addTab(self._cwodmr,'CW ODMR')
         self._mw.tabWidget.addTab(self._st_expt, 'Standard Pulsed Experiments')
 
         self._activate_main_window_ui()
