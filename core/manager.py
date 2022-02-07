@@ -1088,9 +1088,9 @@ class Manager(QtCore.QObject):
             return None
         connections = defined_module['connect']
         deplist = set()
-        for c in connections:
+        for c in connections.keys():
             if not isinstance(connections[c], str):
-                logger.error('Value for class key is not a string.')
+                logger.error("Value for class key '{}' is not a string: '{}' has type '{}'".format(c, connections[c], type(connections[c])))
                 return None
             if '.' in connections[c]:
                 logger.warning('{0}.{1}: connection {2}: {3} has legacy '
