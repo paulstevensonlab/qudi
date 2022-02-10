@@ -203,6 +203,9 @@
          <property name="suffix">
           <string> scans</string>
          </property>
+         <property name="minimum">
+          <number>1</number>
+         </property>
         </widget>
        </item>
       </layout>
@@ -216,7 +219,7 @@
      <x>0</x>
      <y>0</y>
      <width>1568</width>
-     <height>38</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
