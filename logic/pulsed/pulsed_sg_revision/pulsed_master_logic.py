@@ -569,6 +569,7 @@ class PulsedMasterLogic(GenericLogic):
             parameters['Ramsey Step (ns)'] = self.ramseyparams[2]
             parameters['Experiment Type'] = 'Ramsey'
             data_avg['Pulse Delay (ns)'] = self.final_sweep_list
+        # TODO: add Pi pulse duration to Ramsey and pulsed ODMR
 
         data_raw = OrderedDict()
         data_raw['Signal data (counts/s)'] = (self.pulsed_raw_data[0, :, :].squeeze()).T
