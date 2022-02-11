@@ -245,6 +245,9 @@ class PulsedMasterLogic(GenericLogic):
             self.module_state.lock()
             self.stopRequested = False
             self.elapsed_sweeps = 0
+            # Update these so the scan headers are more likely to be correct.
+            self.uw_power = self.odmrlogic1().cw_mw_power
+            self.uw_frequency = self.odmrlogic1().cw_mw_frequency
 
             # Put in statement to read all of the current values from spinboxes
 
