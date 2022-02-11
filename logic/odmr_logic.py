@@ -54,7 +54,7 @@ class ODMRLogic(GenericLogic):
         missing='warn',
         converter=lambda x: MicrowaveMode[x.upper()])
 
-    clock_frequency = StatusVar('clock_frequency', 200)
+    clock_frequency = StatusVar('clock_frequency', 30)
     cw_mw_frequency = StatusVar('cw_mw_frequency', 2870e6)
     cw_mw_power = StatusVar('cw_mw_power', -30)
     sweep_mw_power = StatusVar('sweep_mw_power', -30)
