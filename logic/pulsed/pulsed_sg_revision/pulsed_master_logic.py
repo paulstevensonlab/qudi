@@ -160,6 +160,9 @@ class PulsedMasterLogic(GenericLogic):
 
     def update_from_odmr(self,dict_to_pass):
         self.sigParameterUpdated.emit(dict_to_pass)
+        # TODO: should we do this?
+        # self.uw_frequency = dict_to_pass['cw_mw_frequency']
+        # self.uw_power = dict_to_pass['cw_mw_power']
         return
 
     def update_mw_status(self, _, is_running):
