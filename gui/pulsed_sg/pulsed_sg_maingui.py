@@ -111,6 +111,7 @@ class PulsedMeasurementGui(GUIBase):
         self.expttorun = 'Rabi'
         self.pulselengths = [700,10,3000,300]
         self.pulseconfigs = [0,2,1]
+        self.cwparams = [2.80e9,2.90e9,1.e6,0.1,1,1.e-5]
 
     def on_activate(self):
         """ Initialize, connect and configure the pulsed measurement GUI.
@@ -183,6 +184,7 @@ class PulsedMeasurementGui(GUIBase):
 
 
         # user input signals
+        self._mw.tabWidget.currentChanged.connect(self.change_tab)
         self._mw.mw_freq_spinbox.editingFinished.connect(self.change_cw_params)
         self._mw.mw_power_spinbox.editingFinished.connect(self.change_cw_params)
         self._mw.mw_pi_pulse.editingFinished.connect(self.set_pi_pulse)
@@ -204,6 +206,9 @@ class PulsedMeasurementGui(GUIBase):
         self._pst.connection_status_tb.append('Microwave Source: ' + self._pulsed_logic.odmrlogic1().microwave1().microwave().model)
 
         # setting constant channels
+        self.tabstate = self._mw.tabWidget.currentIndex()
+        self.change_tab()
+
         self.autosave = self._pulsed_logic.autosave
         self._update_save()
 
@@ -217,6 +222,9 @@ class PulsedMeasurementGui(GUIBase):
 
         self.expttorun = self._pulsed_logic.expt_current
         self._update_exptchoice()
+
+        self.cwparams = self._pulsed_logic.cwparams
+        self._update_cwbox()
 
         self.rabiparams = self._pulsed_logic.rabiparams
         self._update_rabibox()
@@ -240,6 +248,7 @@ class PulsedMeasurementGui(GUIBase):
         self.pi_pulse = self._pulsed_logic.pi_pulse
         self._update_pi_pulse()
 
+
         # Start up all the elements
         self.uw_state = True # Start by declaring the MW on so the GUI immediately turns it off on startup
         self.toggle_mw_cw()
@@ -257,6 +266,10 @@ class PulsedMeasurementGui(GUIBase):
         self._st_expt.pulsed_PlotWidget.setLabel(axis='left',text='Normalized Counts',units='AU')
         self._st_expt.pulsed_PlotWidget.setLabel(axis='bottom', text='Pulse Duration', units='ns')
 
+        self._cwodmr.pulsed_PlotWidget.addItem(self.pulsed_image)
+        self._cwodmr.pulsed_PlotWidget.setLabel(axis='left', text='Normalized Counts', units='AU')
+        self._cwodmr.pulsed_PlotWidget.setLabel(axis='bottom', text='Pulse Duration', units='ns')
+
         ## Now do the 2D Plot
         self.pulsed_matrix_image = pg.ImageItem(
             self._pulsed_logic.pulsed_plot_xy.T,
@@ -272,6 +285,10 @@ class PulsedMeasurementGui(GUIBase):
         self._st_expt.pulsed_matrix_PlotWidget.setLabel(axis='left',text='Sweep',units='#')
         self._st_expt.pulsed_matrix_PlotWidget.setLabel(axis='bottom', text='Pulse Duration', units='ns')
 
+        self._cwodmr.pulsed_matrix_PlotWidget.addItem(self.pulsed_matrix_image)
+        self._cwodmr.pulsed_matrix_PlotWidget.setLabel(axis='left', text='Sweep', units='#')
+        self._cwodmr.pulsed_matrix_PlotWidget.setLabel(axis='bottom', text='Pulse Duration', units='ns')
+
         mycolors = ColorScaleInferno()
         self.pulsed_matrix_image.setLookupTable(mycolors.lut)
 
@@ -282,6 +299,12 @@ class PulsedMeasurementGui(GUIBase):
         self._st_expt.cb_plot_widget.hideAxis('bottom')
         self._st_expt.cb_plot_widget.hideAxis('left')
         self._st_expt.cb_plot_widget.setLabel('right', 'Normalized Signal', units='AU')
+
+        # adding colorbar to ViewWidget
+        self._cwodmr.cb_plot_widget.addItem(self.pulsed_cb)
+        self._cwodmr.cb_plot_widget.hideAxis('bottom')
+        self._cwodmr.cb_plot_widget.hideAxis('left')
+        self._cwodmr.cb_plot_widget.setLabel('right', 'Normalized Signal', units='AU')
         return
 
     def on_deactivate(self):
@@ -319,6 +342,13 @@ class PulsedMeasurementGui(GUIBase):
         return
 
     def _connect_standardexpt_signals(self):
+        # CW
+        self._cwodmr.spinbox_odmr_start.editingFinished.connect(self._update_cwvals)
+        self._cwodmr.spinbox_odmr_stop.editingFinished.connect(self._update_cwvals)
+        self._cwodmr.spinbox_odmr_step.editingFinished.connect(self._update_cwvals)
+        self._cwodmr.spinbox_odmr_dwell.editingFinished.connect(self._update_cwvals)
+        self._cwodmr.spinbox_odmr_rep.editingFinished.connect(self._update_cwvals)
+        self._cwodmr.spinbox_odmr_ref.editingFinished.connect(self._update_cwvals)
         # Rabi
         self._st_expt.spinbox_rabi_start.editingFinished.connect(self._update_rabivals)
         self._st_expt.spinbox_rabi_stop.editingFinished.connect(self._update_rabivals)
@@ -411,6 +441,9 @@ class PulsedMeasurementGui(GUIBase):
             elif self.expttorun == 'Hahn Echo':
                 print("Hahn Echo experiments will be implemented in a future edition")
             elif self.expttorun == 'Pulsed ODMR':
+                self.sigStartPulsed.emit()
+            elif self.iscw:
+                self.expttorun = 'CW ODMR'
                 self.sigStartPulsed.emit()
             else:
                 print("I don't know what experiment to run")
@@ -592,6 +625,18 @@ class PulsedMeasurementGui(GUIBase):
         self.sigSaveChanged.emit(self.autosave)
         return
 
+    def change_tab(self):
+        self.tabstate = self._mw.tabWidget.currentIndex()
+        if self.tabstate == 1:
+            self.iscw = True
+            self.expttorun = 'CW ODMR'
+            self.sigExptChanged.emit(self.expttorun)
+        else:
+            self.iscw = False
+            self.change_exptchoice()
+        return
+
+
     def change_autotrack(self):
         self.autotrack = self._mw.autotrack_checkBox.isChecked()
         self.trackevery = self._mw.autotrack_spinBox.value()
@@ -656,6 +701,42 @@ class PulsedMeasurementGui(GUIBase):
     #####   Experiment-specific methods #####
     #########################################
 
+    def _update_cwvals(self):
+        self.cwparams[0] = self._cwodmr.spinbox_odmr_start.value()
+        self.cwparams[1] = self._cwodmr.spinbox_odmr_stop.value()
+        self.cwparams[2] = self._cwodmr.spinbox_odmr_step.value()
+        self.cwparams[3] = self._cwodmr.spinbox_odmr_dwell.value()
+        self.cwparams[4] = self._cwodmr.spinbox_odmr_rep.value()
+        self.cwparams[5] = self._cwodmr.spinbox_odmr_ref.value()
+        self._pulsed_logic.set_cw(self.cwparams)
+        return
+
+    def _update_cwbox(self):
+        self._cwodmr.spinbox_odmr_start.blockSignals(True)
+        self._cwodmr.spinbox_odmr_start.setValue(self.cwparams[0])
+        self._cwodmr.spinbox_odmr_start.blockSignals(False)
+
+        self._cwodmr.spinbox_odmr_stop.blockSignals(True)
+        self._cwodmr.spinbox_odmr_stop.setValue(self.cwparams[1])
+        self._cwodmr.spinbox_odmr_stop.blockSignals(False)
+
+        self._cwodmr.spinbox_odmr_step.blockSignals(True)
+        self._cwodmr.spinbox_odmr_step.setValue(self.cwparams[2])
+        self._cwodmr.spinbox_odmr_step.blockSignals(False)
+
+        self._cwodmr.spinbox_odmr_dwell.blockSignals(True)
+        self._cwodmr.spinbox_odmr_dwell.setValue(self.cwparams[3])
+        self._cwodmr.spinbox_odmr_dwell.blockSignals(False)
+
+        self._cwodmr.spinbox_odmr_dwell.blockSignals(True)
+        self._cwodmr.spinbox_odmr_dwell.setValue(self.cwparams[4])
+        self._cwodmr.spinbox_odmr_dwell.blockSignals(False)
+
+        self._cwodmr.spinbox_odmr_ref.blockSignals(True)
+        self._cwodmr.spinbox_odmr_ref.setValue(self.cwparams[5])
+        self._cwodmr.spinbox_odmr_ref.blockSignals(False)
+        return
+
     def _update_rabivals(self):
         self.rabiparams[0] = self._st_expt.spinbox_rabi_start.value()
         self.rabiparams[1] = self._st_expt.spinbox_rabi_stop.value()
@@ -664,6 +745,7 @@ class PulsedMeasurementGui(GUIBase):
         self.rabiparams[4] = self._st_expt.spinbox_rabi_rep.value()
         self._pulsed_logic.set_rabi(self.rabiparams)
         return
+
 
     def _update_rabibox(self):
         self._st_expt.spinbox_rabi_start.blockSignals(True)
@@ -778,6 +860,11 @@ class PulsedMeasurementGui(GUIBase):
         if param is not None:
             self.channel_states = param
             self._update_do_indicators()
+
+        param = param_dict.get('CW_params')
+        if param is not None:
+            self.cwparams = param
+            self._update_cwbox()
 
         param = param_dict.get('Rabi_params')
         if param is not None:

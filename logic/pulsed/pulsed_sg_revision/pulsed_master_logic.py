@@ -63,6 +63,7 @@ class PulsedMasterLogic(GenericLogic):
     do_channel_states = StatusVar('DO channel states', [0,0,0,0,0,0,0,0])
     pulselengths = StatusVar('Pulse Timing Parameters',[700,10,3000,300]) # aom delay, microwave delay, aom pulse length, integration time, all in nanoseconds
     pulseconfigs = StatusVar('Pulse Channel Configuration',[0,2,1]) # channels for AOM, microwave switch, gate/sync
+    cwparams = StatusVar('CW ODMR params', [2.80e9,2.90e9,1.e6,0.1,1,1.e-5])  # start, stop, step, dwell per point, average, length of ref pulse
     rabiparams = StatusVar('Rabi params',[10., 1000., 10., 0.1, 1])  # start, stop, step, dwell per point, average
     ramseyparams = StatusVar('Rabi params', [10., 1000., 10., 0.1, 1])  # start, stop, step, dwell per point, average
     odmrparams = StatusVar('Pulsed ODMR params',[2.80e9,2.90e9,1.e6,0.1,1]) # start, stop, step, dwell per point, average
@@ -112,6 +113,7 @@ class PulsedMasterLogic(GenericLogic):
                                                        QtCore.Qt.QueuedConnection)
 
         self.number_of_lines = self.rabiparams[4]
+        self.iscw = False
 
         if self.expt_current == 'Rabi':
             self.exptparams = self.rabiparams
@@ -184,6 +186,11 @@ class PulsedMasterLogic(GenericLogic):
     ###             Experiment methods                          ###
     #######################################################################
 
+    def set_cw(self,iscw):
+        if iscw is not None:
+            self.iscw = iscw
+        return
+
     def set_expt(self,exptname):
         if exptname is not None:
             self.expt_current = exptname
@@ -216,6 +223,13 @@ class PulsedMasterLogic(GenericLogic):
             self.pi2_pulse = np.round(self.pi_pulse/2)
             update_dict = {'Pi_pulse': self.pi_pulse}
             self.sigParameterUpdated.emit(update_dict)
+        return
+
+    def set_cw(self, cwparams=None):
+        if cwparams is not None:
+            self.cwparams = cwparams
+        update_dict = {'CW_params': self.cwparams}
+        self.sigParameterUpdated.emit(update_dict)
         return
 
     def set_rabi(self, rabiparams=None):
@@ -254,6 +268,7 @@ class PulsedMasterLogic(GenericLogic):
 
             # Put in statement to read all of the current values from spinboxes
 
+
             if self.expt_current == 'Rabi':
                 self.scanvar = 'Time'
                 self.exptparams = self.rabiparams
@@ -286,11 +301,19 @@ class PulsedMasterLogic(GenericLogic):
                 self.scanvar = 'Freq'
                 self.stopRequested = True
                 print('I can only deal with Rabi experiments right now')
+            elif self.expt_current == 'CW ODMR':
+                self.scanvar = 'Freq'
+                self.exptparams = self.cwparams
+                odmr_status = self._setup_cw()
+                if odmr_status < 0:
+                    self.module_state.unlock()
+                    print("Issue setting up. Investigate")
             else:
                 self.stopRequested = True
                 print("I don't know what that experiment is")
 
             self._initialize_pulsed_plots()
+            self.exptrunning = self.expt_current
 
             self.number_of_lines = int(self.exptparams[4])
             self.pulsed_raw_data = np.zeros((3, self.final_sweep_list.size, self.number_of_lines)) # will save sig, ref, and sig/ref
@@ -332,18 +355,21 @@ class PulsedMasterLogic(GenericLogic):
 
                 #do some tracking
 
-
-            st_inds = [0,int(self.pulselengths[3])]
-            end_inds = [int(self.pulselengths[2]-self.pulselengths[3]),int(self.pulselengths[2])]
+            if self.exptrunning == 'CW ODMR':
+                st_inds = [0,int(self.cwparams[5]*1e9)-1]
+                end_inds = [int(self.cwparams[5]*1e9),int(2*self.cwparams[5]*1e9)-1]
+            else:
+                st_inds = [0,int(self.pulselengths[3])]
+                end_inds = [int(self.pulselengths[2]-self.pulselengths[3]),int(self.pulselengths[2])]
 
             # This needs a case for scanning frequency - mostly for pulsed ODMR
 
             if self.scanvar == 'Time':
                 for k, tau in enumerate(self.final_sweep_list):
                     self.sequence_dict['Channels'] = self.pulseconfigs
-                    if self.expt_current == 'Rabi':
+                    if self.exptrunning == 'Rabi':
                         self.sequence_dict['Levels'] = self.rabi_sequence(tau, self.final_sweep_list.max())
-                    elif self.expt_current == 'Ramsey':
+                    elif self.exptrunning == 'Ramsey':
                         self.sequence_dict['Levels'] = self.ramsey_sequence(tau,self.final_sweep_list.max())
                     self.pulsegenerator().direct_write(self.sequence_dict)
                     self.pulsegenerator().pulser_on()
@@ -371,6 +397,8 @@ class PulsedMasterLogic(GenericLogic):
                                 np.mean(self.fromcounter[0, st_inds[0]:st_inds[1]]) /
                                 np.mean(self.fromcounter[0, end_inds[0]:end_inds[1]]))
                 self.odmrlogic1()._mw_device.trigger()
+                #
+
             else:
                 print('Error: scanvar not correctly set')
 
@@ -394,6 +422,26 @@ class PulsedMasterLogic(GenericLogic):
     ##################################################
     #### PULSED METHODS ARE HERE #####################
     ##################################################
+
+    def _setup_cw(self):
+        self.final_sweep_list = np.arange(self.exptparams[0], self.exptparams[1] + self.exptparams[2],
+                                          self.exptparams[2])
+        self.sequence_dict['Channels'] = self.pulseconfigs
+        self.sequence_dict['Levels'] = self.cw_odmr_sequence()
+        self.pulsegenerator().direct_write(self.sequence_dict)
+        self.pulsegenerator().pulser_on()
+
+        totaltime = 2*self.cwparams[5]
+        self.fastcounter().configure(1.e-9, 1e-9 * totaltime, 1)
+
+        mode, is_running = self.mw_sweep_on(self.odmrparams)
+        if not is_running:
+            print('Error initializing microwave sweep')
+            return -1
+        return 0
+
+        return 0
+
 
     def _setup_rabi(self):
         """" here we need to setup the integration, and probably pre-generate the pulse sequences to feed to the pulse streamer """""
@@ -481,6 +529,18 @@ class PulsedMasterLogic(GenericLogic):
 
         return [laser_rle, mw_rle, sync_rle]
 
+    def cw_odmr_sequence(self):
+        totallength = 2*self.cwparams[5]
+        sync_patt = [(100, 1), (int(totallength - 100), 0)]
+        mw_patt = [int(self.cwparams[5],0),int(self.cwparams[5],1)]
+        laser_patt = [(int(totallength),1)]
+
+        laser_rle = self.traj_to_rle(np.roll(self.rle_to_traj(laser_patt), int(-1 * self.pulselengths[0])))
+        mw_rle = self.traj_to_rle(np.roll(self.rle_to_traj(mw_patt), int(self.pulselengths[1])))
+        sync_rle = sync_patt
+
+        return [laser_rle, mw_rle, sync_rle]
+
     ## Helpful functions
 
     def _initialize_pulsed_plots(self):
@@ -543,7 +603,7 @@ class PulsedMasterLogic(GenericLogic):
         if tag is None:
             tag = ''
 
-        expt_add = (self.expt_current).replace(" ","")
+        expt_add = (self.exptrunning).replace(" ","")
         filelabel_raw = '{0}_Pulsed_'.format(tag) + expt_add + '_raw'
 
         data_avg = OrderedDict()
@@ -555,14 +615,14 @@ class PulsedMasterLogic(GenericLogic):
         parameters['Dwell Time (s)'] = self.exptparams[3]
         parameters['Number of Averages (#)'] = self.exptparams[4]
 
-        if self.expt_current == 'Rabi':
+        if self.exptrunning == 'Rabi':
             parameters['Microwave Frequency (Hz)'] = self.uw_frequency
             parameters['Rabi Start (ns)'] = self.rabiparams[0]
             parameters['Rabi Stop (ns)'] = self.rabiparams[1]
             parameters['Rabi Step (ns)'] = self.rabiparams[2]
             parameters['Experiment Type'] = 'Rabi'
             data_avg['Pulse Length (ns)'] = self.final_sweep_list
-        elif self.expt_current == 'Ramsey':
+        elif self.exptrunning == 'Ramsey':
             parameters['Microwave Frequency (Hz)'] = self.uw_frequency
             parameters['Ramsey Start (ns)'] = self.ramseyparams[0]
             parameters['Ramsey Stop (ns)'] = self.ramseyparams[1]
