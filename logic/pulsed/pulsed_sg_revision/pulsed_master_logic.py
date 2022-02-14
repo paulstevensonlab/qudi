@@ -434,7 +434,7 @@ class PulsedMasterLogic(GenericLogic):
         totaltime = 2*self.cwparams[5]*1e9
         self.fastcounter().configure(1.e-9, 1e-9 * totaltime, 1)
 
-        mode, is_running = self.mw_sweep_on(self.odmrparams)
+        mode, is_running = self.mw_sweep_on(self.cwparams)
         if not is_running:
             print('Error initializing microwave sweep')
             return -1
