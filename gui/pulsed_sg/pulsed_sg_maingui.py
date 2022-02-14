@@ -728,9 +728,9 @@ class PulsedMeasurementGui(GUIBase):
         self._cwodmr.spinbox_odmr_dwell.setValue(self.cwparams[3])
         self._cwodmr.spinbox_odmr_dwell.blockSignals(False)
 
-        self._cwodmr.spinbox_odmr_dwell.blockSignals(True)
-        self._cwodmr.spinbox_odmr_dwell.setValue(self.cwparams[4])
-        self._cwodmr.spinbox_odmr_dwell.blockSignals(False)
+        self._cwodmr.spinbox_odmr_rep.blockSignals(True)
+        self._cwodmr.spinbox_odmr_rep.setValue(self.cwparams[4])
+        self._cwodmr.spinbox_odmr_rep.blockSignals(False)
 
         self._cwodmr.spinbox_odmr_ref.blockSignals(True)
         self._cwodmr.spinbox_odmr_ref.setValue(self.cwparams[5])
