@@ -238,7 +238,7 @@
          </widget>
         </item>
         <item row="1" column="4">
-         <widget class="ScienDSpinBox" name="spinbox_ref_pulse">
+         <widget class="ScienDSpinBox" name="spinbox_odmr_ref">
           <property name="layoutDirection">
            <enum>Qt::LeftToRight</enum>
           </property>
