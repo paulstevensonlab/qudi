@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1318</width>
-    <height>1001</height>
+    <height>1000</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -238,7 +238,10 @@
          </widget>
         </item>
         <item row="1" column="4">
-         <widget class="ScienDSpinBox" name="doubleSpinBox">
+         <widget class="ScienDSpinBox" name="spinbox_ref_pulse">
+          <property name="layoutDirection">
+           <enum>Qt::LeftToRight</enum>
+          </property>
           <property name="suffix">
            <string>s</string>
           </property>
@@ -249,7 +252,7 @@
            <double>1000000.000000000000000</double>
           </property>
           <property name="value">
-           <double>0.000000000000000</double>
+           <double>0.000100000000000</double>
           </property>
          </widget>
         </item>
