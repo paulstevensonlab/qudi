@@ -262,11 +262,19 @@ class PulsedMeasurementGui(GUIBase):
                                           symbolBrush=palette.c1,
                                           symbolSize=7)
 
+        self.pulsed_image2 = pg.PlotDataItem(self._pulsed_logic.pulsed_plot_x,
+                                            self._pulsed_logic.pulsed_plot_y,
+                                            pen=pg.mkPen(palette.c1, style=QtCore.Qt.DotLine),
+                                            symbol='o',
+                                            symbolPen=palette.c1,
+                                            symbolBrush=palette.c1,
+                                            symbolSize=7)
+
         self._st_expt.pulsed_PlotWidget.addItem(self.pulsed_image)
         self._st_expt.pulsed_PlotWidget.setLabel(axis='left',text='Normalized Counts',units='AU')
         self._st_expt.pulsed_PlotWidget.setLabel(axis='bottom', text='Pulse Duration', units='ns')
 
-        self._cwodmr.pulsed_PlotWidget.addItem(self.pulsed_image)
+        self._cwodmr.pulsed_PlotWidget.addItem(self.pulsed_image2)
         self._cwodmr.pulsed_PlotWidget.setLabel(axis='left', text='Normalized Counts', units='AU')
         self._cwodmr.pulsed_PlotWidget.setLabel(axis='bottom', text='Pulse Duration', units='ns')
 
@@ -281,11 +289,21 @@ class PulsedMeasurementGui(GUIBase):
             self._pulsed_logic.number_of_lines
         ))
 
+        self.pulsed_matrix_image2 = pg.ImageItem(
+            self._pulsed_logic.pulsed_plot_xy.T,
+            axisOrder='row-major')
+        self.pulsed_matrix_image.setRect(QtCore.QRectF(
+            self._pulsed_logic.rabiparams[0],
+            0,
+            self._pulsed_logic.rabiparams[1] - self._pulsed_logic.rabiparams[0],
+            self._pulsed_logic.number_of_lines
+        ))
+
         self._st_expt.pulsed_matrix_PlotWidget.addItem(self.pulsed_matrix_image)
         self._st_expt.pulsed_matrix_PlotWidget.setLabel(axis='left',text='Sweep',units='#')
         self._st_expt.pulsed_matrix_PlotWidget.setLabel(axis='bottom', text='Pulse Duration', units='ns')
 
-        self._cwodmr.pulsed_matrix_PlotWidget.addItem(self.pulsed_matrix_image)
+        self._cwodmr.pulsed_matrix_PlotWidget.addItem(self.pulsed_matrix_image2)
         self._cwodmr.pulsed_matrix_PlotWidget.setLabel(axis='left', text='Sweep', units='#')
         self._cwodmr.pulsed_matrix_PlotWidget.setLabel(axis='bottom', text='Pulse Duration', units='ns')
 
@@ -476,14 +494,20 @@ class PulsedMeasurementGui(GUIBase):
 ## Main Window Related Methods
     def update_plots(self,pulsed_data_x,pulsed_data_y,pulsed_data_xy):
         self.pulsed_image.setData(pulsed_data_x,pulsed_data_y[2,:])
+        self.pulsed_image2.setData(pulsed_data_x, pulsed_data_y[2, :])
 
         self.pulsed_matrix_image.setImage(image=pulsed_data_xy[2, :, :].T,
+                                          axisOrder='row-major')
+        self.pulsed_matrix_image2.setImage(image=pulsed_data_xy[2, :, :].T,
                                           axisOrder='row-major')
         cb_range = self.get_matrix_cb_range()
         # cb_range=[0,1]
         # self.update_colorbar(cb_range)
 
         self.pulsed_matrix_image.setImage(image=pulsed_data_xy[2,:,:].T,
+                                          axisOrder='row-major',
+                                          levels=(cb_range[0], cb_range[1]))
+        self.pulsed_matrix_image2.setImage(image=pulsed_data_xy[2, :, :].T,
                                           axisOrder='row-major',
                                           levels=(cb_range[0], cb_range[1]))
         return
