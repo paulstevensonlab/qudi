@@ -443,7 +443,7 @@ class PulsedMeasurementGui(GUIBase):
             self._st_expt.spinbox_ramsey_step.setEnabled(False)
             self._st_expt.spinbox_ramsey_dwell.setEnabled(False)
             self._st_expt.spinbox_ramsey_rep.setEnabled(False)
-            ## ODMR ##
+            ## Pulsed ODMR ##
             self._st_expt.spinbox_odmr_start.setEnabled(False)
             self._st_expt.spinbox_odmr_stop.setEnabled(False)
             self._st_expt.spinbox_odmr_step.setEnabled(False)
@@ -583,7 +583,7 @@ class PulsedMeasurementGui(GUIBase):
             self._st_expt.spinbox_ramsey_step.setEnabled(True)
             self._st_expt.spinbox_ramsey_dwell.setEnabled(True)
             self._st_expt.spinbox_ramsey_rep.setEnabled(True)
-            ## ODMR ##
+            ## Pulsed ODMR ##
             self._st_expt.spinbox_odmr_start.setEnabled(True)
             self._st_expt.spinbox_odmr_stop.setEnabled(True)
             self._st_expt.spinbox_odmr_dwell.setEnabled(True)
