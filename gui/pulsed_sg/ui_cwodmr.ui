@@ -259,7 +259,7 @@
         <item row="1" column="3">
          <widget class="QLabel" name="label">
           <property name="text">
-           <string>Referemce Pulse</string>
+           <string>Reference Pulse</string>
           </property>
          </widget>
         </item>
