@@ -431,7 +431,7 @@ class PulsedMasterLogic(GenericLogic):
         self.pulsegenerator().direct_write(self.sequence_dict)
         self.pulsegenerator().pulser_on()
 
-        totaltime = 2*self.cwparams[5]
+        totaltime = 2*self.cwparams[5]*1e9
         self.fastcounter().configure(1.e-9, 1e-9 * totaltime, 1)
 
         mode, is_running = self.mw_sweep_on(self.odmrparams)
@@ -530,10 +530,10 @@ class PulsedMasterLogic(GenericLogic):
         return [laser_rle, mw_rle, sync_rle]
 
     def cw_odmr_sequence(self):
-        totallength = 2*self.cwparams[5]
+        totallength = 2*self.cwparams[5]*1e9
         sync_patt = [(100, 1), (int(totallength - 100), 0)]
-        mw_patt = [int(self.cwparams[5],0),int(self.cwparams[5],1)]
-        laser_patt = [(int(totallength),1)]
+        mw_patt = [(int(self.cwparams[5]*1e9),1),(int(self.cwparams[5]*1e9),0)]
+        laser_patt = [(int(totallength-10),1),(int(10),0)]
 
         laser_rle = self.traj_to_rle(np.roll(self.rle_to_traj(laser_patt), int(-1 * self.pulselengths[0])))
         mw_rle = self.traj_to_rle(np.roll(self.rle_to_traj(mw_patt), int(self.pulselengths[1])))
