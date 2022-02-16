@@ -99,6 +99,7 @@ class PulsedMeasurementGui(GUIBase):
     sigExptChanged = QtCore.Signal(str)
     sigSaveChanged = QtCore.Signal(bool)
     sigTrackChanged = QtCore.Signal(bool,int)
+    sigNameChanged = QtCore.Signal(str)
     sigSaveMeasurement = QtCore.Signal(str, list, list)
 
     def __init__(self, config, **kwargs):
@@ -171,6 +172,7 @@ class PulsedMeasurementGui(GUIBase):
         self.sigMwOff.connect(self._pulsed_logic.mw_off, QtCore.Qt.QueuedConnection)
         self.sigStartPulsed.connect(self._pulsed_logic.start_pulsed_scan, QtCore.Qt.QueuedConnection)
         self.sigStopPulsed.connect(self._pulsed_logic.stop_pulsed_scan, QtCore.Qt.QueuedConnection)
+        self.sigNameChanged.connect(self._pulsed_logic.change_fname, QtCore.Qt.QueuedConnection)
         self.sigMwCwParamsChanged.connect(self._pulsed_logic.odmrlogic1().set_cw_parameters,
                                           QtCore.Qt.QueuedConnection)
         self.sigPiPulseChanged.connect(self._pulsed_logic.set_pi_pulse,
@@ -188,11 +190,13 @@ class PulsedMeasurementGui(GUIBase):
         self._mw.mw_freq_spinbox.editingFinished.connect(self.change_cw_params)
         self._mw.mw_power_spinbox.editingFinished.connect(self.change_cw_params)
         self._mw.mw_pi_pulse.editingFinished.connect(self.set_pi_pulse)
+        self._mw.save_tag_LineEdit.editingFinished.connect(self.set_fname)
 
         self._st_expt.combo_exptchoice.currentIndexChanged.connect(self.change_exptchoice)
         self._mw.autosave_checkBox.stateChanged.connect(self.change_autosave)
         self._mw.autotrack_checkBox.stateChanged.connect(self.change_autotrack)
         self._mw.autotrack_spinBox.valueChanged.connect(self.change_autotrack)
+
 
         # checking instrument status
         self.streamer_status = self._pulsed_logic.get_streamer_status()
@@ -309,6 +313,7 @@ class PulsedMeasurementGui(GUIBase):
 
         mycolors = ColorScaleInferno()
         self.pulsed_matrix_image.setLookupTable(mycolors.lut)
+        self.pulsed_matrix_image2.setLookupTable(mycolors.lut)
 
         self.pulsed_cb = ColorBar(mycolors.cmap_normed, 100, 0, 1)
 
@@ -493,6 +498,22 @@ class PulsedMeasurementGui(GUIBase):
 
 ## Main Window Related Methods
     def update_plots(self,pulsed_data_x,pulsed_data_y,pulsed_data_xy):
+
+        # if self._pulsed_logic.exptrunning == 'Rabi' or self._pulsed_logic.exptrunning == 'Ramsey':
+        #     self.units = 'ns'
+        #     self.label = 'Time'
+        # elif self._pulsed_logic.exptrunning == 'CW ODMR' or self._pulsed_logic.exptrunning == 'Pulsed ODMR':
+        #     self.units = 'Hz'
+        #     self.label = 'Frequency'
+        # else:
+        #     self.units = 'AU'
+        #     self.label = 'Scan'
+        #     return
+        #
+        # self._st_expt.pulsed_PlotWidget.getPlotItem().setLabel('bottom',text=self.label,units=self.units)
+        # self._cwodmr.pulsed_PlotWidget.getPlotItem().setLabel('bottom', text=self.label, units=self.units)
+
+
         self.pulsed_image.setData(pulsed_data_x,pulsed_data_y[2,:])
         self.pulsed_image2.setData(pulsed_data_x, pulsed_data_y[2, :])
 
@@ -502,7 +523,7 @@ class PulsedMeasurementGui(GUIBase):
                                           axisOrder='row-major')
         cb_range = self.get_matrix_cb_range()
         # cb_range=[0,1]
-        # self.update_colorbar(cb_range)
+        self.update_colorbar(cb_range)
 
         self.pulsed_matrix_image.setImage(image=pulsed_data_xy[2,:,:].T,
                                           axisOrder='row-major',
@@ -632,6 +653,10 @@ class PulsedMeasurementGui(GUIBase):
         power = self._mw.mw_power_spinbox.value()
         self.sigMwCwParamsChanged.emit(frequency, power)
         return
+
+    def set_fname(self):
+        self.fname = self._mw.save_tag_LineEdit.text()
+        self.sigNameChanged.emit(self.fname)
 
     def set_pi_pulse(self):
         """ Set the pulse length for a pi and pi/2 pulse"""

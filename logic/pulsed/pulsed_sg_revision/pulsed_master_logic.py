@@ -114,6 +114,7 @@ class PulsedMasterLogic(GenericLogic):
 
         self.number_of_lines = self.rabiparams[4]
         self.iscw = False
+        self.fname = ''
 
         if self.expt_current == 'Rabi':
             self.exptparams = self.rabiparams
@@ -174,6 +175,7 @@ class PulsedMasterLogic(GenericLogic):
             self.sigMWStatusChanged.emit(False)
         return
 
+
     def mw_cw_on(self):
         self.odmrlogic1().mw_cw_on()
         return
@@ -223,6 +225,11 @@ class PulsedMasterLogic(GenericLogic):
             self.pi2_pulse = np.round(self.pi_pulse/2)
             update_dict = {'Pi_pulse': self.pi_pulse}
             self.sigParameterUpdated.emit(update_dict)
+        return
+
+    def change_fname(self,fname=None):
+        if fname is not None:
+            self.fname = fname
         return
 
     def set_cw(self, cwparams=None):
@@ -339,7 +346,7 @@ class PulsedMasterLogic(GenericLogic):
                 self.stopRequested = False
                 self.mw_off()
                 if self.autosave:
-                    self.save_pulsed_data()
+                    self.save_pulsed_data(tag=self.fname)
                 self.sigExptRunningUpdated.emit(False)
                 self.module_state.unlock()
                 return
