@@ -108,6 +108,7 @@ class PulsedMeasurementGui(GUIBase):
         self.expttorun = 'Rabi'
         self.rabiparams = [10.,1000.,10.,0.1,1] # start, stop, step, dwell per point, average
         self.ramseyparams = [10., 1000., 10., 0.1, 1]  # start, stop, step, dwell per point, average
+        self.t1params = [10., 1000., 10., 0.1, 1]  # start, stop, step, dwell per point, average
         self.odmrparams = [2.80e9,2.90e9,1.e6,0.1,1]
         self.expttorun = 'Rabi'
         self.pulselengths = [700,10,3000,300]
@@ -378,12 +379,18 @@ class PulsedMeasurementGui(GUIBase):
         self._st_expt.spinbox_rabi_step.editingFinished.connect(self._update_rabivals)
         self._st_expt.spinbox_rabi_dwell.editingFinished.connect(self._update_rabivals)
         self._st_expt.spinbox_rabi_rep.editingFinished.connect(self._update_rabivals)
-
+        # Ramsey
         self._st_expt.spinbox_ramsey_start.editingFinished.connect(self._update_ramseyvals)
         self._st_expt.spinbox_ramsey_stop.editingFinished.connect(self._update_ramseyvals)
         self._st_expt.spinbox_ramsey_step.editingFinished.connect(self._update_ramseyvals)
         self._st_expt.spinbox_ramsey_dwell.editingFinished.connect(self._update_ramseyvals)
         self._st_expt.spinbox_ramsey_rep.editingFinished.connect(self._update_ramseyvals)
+        # T1
+        self._st_expt.spinbox_t1_start.editingFinished.connect(self._update_t1vals)
+        self._st_expt.spinbox_t1_stop.editingFinished.connect(self._update_t1vals)
+        self._st_expt.spinbox_t1_step.editingFinished.connect(self._update_t1vals)
+        self._st_expt.spinbox_t1_dwell.editingFinished.connect(self._update_t1vals)
+        self._st_expt.spinbox_t1_rep.editingFinished.connect(self._update_t1vals)
 
         self._st_expt.spinbox_odmr_start.editingFinished.connect(self._update_odmrvals)
         self._st_expt.spinbox_odmr_stop.editingFinished.connect(self._update_odmrvals)
@@ -849,6 +856,38 @@ class PulsedMeasurementGui(GUIBase):
         self._st_expt.spinbox_ramsey_rep.blockSignals(False)
         return
 
+    def _update_t1(self):
+        self.t1params[0] = self._st_expt.spinbox_t1_start.value()
+        self.t1params[1] = self._st_expt.spinbox_t1_stop.value()
+        self.t1params[2] = self._st_expt.spinbox_t1_step.value()
+        self.t1params[3] = self._st_expt.spinbox_t1_dwell.value()
+        self.t1params[4] = self._st_expt.spinbox_t1_rep.value()
+        self._pulsed_logic.set_t1(self.t1params)
+        return
+
+    def _update_t1box(self):
+        self._st_expt.spinbox_t1_start.blockSignals(True)
+        self._st_expt.spinbox_t1_start.setValue(self.t1params[0])
+        self._st_expt.spinbox_t1_start.blockSignals(False)
+
+        self._st_expt.spinbox_t1_stop.blockSignals(True)
+        self._st_expt.spinbox_t1_stop.setValue(self.t1params[1])
+        self._st_expt.spinbox_t1_stop.blockSignals(False)
+
+        self._st_expt.spinbox_t1_step.blockSignals(True)
+        self._st_expt.spinbox_t1_step.setValue(self.t1params[2])
+        self._st_expt.spinbox_t1_step.blockSignals(False)
+
+        self._st_expt.spinbox_t1_dwell.blockSignals(True)
+        self._st_expt.spinbox_t1_dwell.setValue(self.t1params[3])
+        self._st_expt.spinbox_t1_dwell.blockSignals(False)
+
+        self._st_expt.spinbox_t1_rep.blockSignals(True)
+        self._st_expt.spinbox_t1_rep.setValue(self.t1params[4])
+        self._st_expt.spinbox_t1_rep.blockSignals(False)
+        return
+
+
     def _update_odmrvals(self):
         self.odmrparams[0] = self._st_expt.spinbox_odmr_start.value()
         self.odmrparams[1] = self._st_expt.spinbox_odmr_stop.value()
@@ -924,6 +963,11 @@ class PulsedMeasurementGui(GUIBase):
         if param is not None:
             self.ramseyparams = param
             self._update_ramseybox()
+
+        param = param_dict.get('T1_params')
+        if param is not None:
+            self.t1params = param
+            self._update_t1box()
 
         param = param_dict.get('ODMR_params')
         if param is not None:

@@ -65,7 +65,8 @@ class PulsedMasterLogic(GenericLogic):
     pulseconfigs = StatusVar('Pulse Channel Configuration',[0,2,1]) # channels for AOM, microwave switch, gate/sync
     cwparams = StatusVar('CW ODMR params', [2.80e9,2.90e9,1.e6,0.1,1,1.e-5])  # start, stop, step, dwell per point, average, length of ref pulse
     rabiparams = StatusVar('Rabi params',[10., 1000., 10., 0.1, 1])  # start, stop, step, dwell per point, average
-    ramseyparams = StatusVar('Rabi params', [10., 1000., 10., 0.1, 1])  # start, stop, step, dwell per point, average
+    ramseyparams = StatusVar('Ramsey params', [10., 1000., 10., 0.1, 1])  # start, stop, step, dwell per point, average
+    t1params = StatusVar('T1 params', [10., 1000., 10., 0.1, 1])  # start, stop, step, dwell per point, average
     odmrparams = StatusVar('Pulsed ODMR params',[2.80e9,2.90e9,1.e6,0.1,1]) # start, stop, step, dwell per point, average
     expt_current = StatusVar('Standard Expt', 'Rabi')
     pi_pulse = StatusVar('Pi Pulse Time',100.)
@@ -120,6 +121,8 @@ class PulsedMasterLogic(GenericLogic):
             self.exptparams = self.rabiparams
         elif self.expt_current == 'Ramsey':
             self.exptparams = self.ramseyparams
+        elif self.expt_current == 'T1':
+            self.exptparams = self.t1params
         else: ## NOTE - this needs to be updated later to account for more event cases
             self.exptparams = self.rabiparams
 
@@ -253,6 +256,13 @@ class PulsedMasterLogic(GenericLogic):
         self.sigParameterUpdated.emit(update_dict)
         return
 
+    def set_t1(self,t1params=None):
+        if t1params is not None:
+            self.t1params = t1params
+        update_dict = {'T1_params': self.t1params}
+        self.sigParameterUpdated.emit(update_dict)
+        return
+
     def set_odmr(self,odmrparams=None):
         if odmrparams is not None:
             self.odmrparams = odmrparams
@@ -315,6 +325,14 @@ class PulsedMasterLogic(GenericLogic):
                 if odmr_status < 0:
                     self.module_state.unlock()
                     print("Issue setting up. Investigate")
+            elif self.expt_current == 'T1':
+            # right now this is an all-optical T1 implementation
+                self.scanvar = 'Time'
+                self.exptparams = self.t1params
+                t1_status = self._setup_t1()
+                if t1_status < 0:
+                    self.module_state.unlock()
+                    print("Issue connecting - will put proper error handling in later")
             else:
                 self.stopRequested = True
                 print("I don't know what that experiment is")
@@ -378,6 +396,8 @@ class PulsedMasterLogic(GenericLogic):
                         self.sequence_dict['Levels'] = self.rabi_sequence(tau, self.final_sweep_list.max())
                     elif self.exptrunning == 'Ramsey':
                         self.sequence_dict['Levels'] = self.ramsey_sequence(tau,self.final_sweep_list.max())
+                    elif self.exptrunning == 'T1':
+                        self.sequence_dict['Levels'] = self.t1_sequence(tau,self.final_sweep_list.max())
                     self.pulsegenerator().direct_write(self.sequence_dict)
                     self.pulsegenerator().pulser_on()
                     self.fromcounter = self.fastcounter().measure_for(self.exptparams[3])
@@ -478,6 +498,19 @@ class PulsedMasterLogic(GenericLogic):
         self.fastcounter().configure(1.e-9, 1e-9 * totaltime, 1)
         return 0
 
+    def _setup_t1(self):
+        self.final_sweep_list = np.arange(self.exptparams[0], self.exptparams[1] + self.exptparams[2],
+                                          self.exptparams[2])
+
+        self.sequence_dict['Channels'] = self.pulseconfigs
+        self.sequence_dict['Levels'] = self.t1_sequence(10., self.final_sweep_list.max())
+        self.pulsegenerator().direct_write(self.sequence_dict)
+        self.pulsegenerator().pulser_on()
+
+        totaltime = self.pulselengths[2] + self.final_sweep_list.max() + 2*self.pi2_pulse + 50
+        self.fastcounter().configure(1.e-9, 1e-9 * totaltime, 1)
+        return 0
+
     def _setup_odmr(self):
         self.final_sweep_list = np.arange(self.exptparams[0], self.exptparams[1] + self.exptparams[2],
                                           self.exptparams[2])
@@ -516,6 +549,18 @@ class PulsedMasterLogic(GenericLogic):
         mw_patt = [(int(self.pulselengths[2] + 50), 0), (int(self.pi2_pulse), 1), (int(tau), 0),
                    (int(self.pi2_pulse), 1),
                    (int(totallength - self.pulselengths[2] - 2 * self.pi2_pulse - 50 - tau), 0)]
+        laser_patt = [(self.pulselengths[2], 1), (int(totallength - self.pulselengths[2]), 0)]
+
+        laser_rle = self.traj_to_rle(np.roll(self.rle_to_traj(laser_patt), int(-1 * self.pulselengths[0])))
+        mw_rle = self.traj_to_rle(np.roll(self.rle_to_traj(mw_patt), int(self.pulselengths[1])))
+        sync_rle = sync_patt
+
+        return [laser_rle, mw_rle, sync_rle]
+
+    def t1_sequence(self,tau=100,taumax=2000):
+        totallength = self.pulselengths[2] + self.final_sweep_list.max() + 2*self.pi2_pulse + 50
+        sync_patt = [(100, 1), (int(totallength - 100), 0)]
+        mw_patt = [(100, 0), (int(totallength - 100), 0)]
         laser_patt = [(self.pulselengths[2], 1), (int(totallength - self.pulselengths[2]), 0)]
 
         laser_rle = self.traj_to_rle(np.roll(self.rle_to_traj(laser_patt), int(-1 * self.pulselengths[0])))
@@ -635,6 +680,12 @@ class PulsedMasterLogic(GenericLogic):
             parameters['Ramsey Stop (ns)'] = self.ramseyparams[1]
             parameters['Ramsey Step (ns)'] = self.ramseyparams[2]
             parameters['Experiment Type'] = 'Ramsey'
+            data_avg['Pulse Delay (ns)'] = self.final_sweep_list
+        elif self.exptrunning == 'T1':
+            parameters['T1 Start (ns)'] = self.t1params[0]
+            parameters['T1 Stop (ns)'] = self.t1params[1]
+            parameters['T1 Step (ns)'] = self.t1params[2]
+            parameters['Experiment Type'] = 'T1'
             data_avg['Pulse Delay (ns)'] = self.final_sweep_list
         elif self.exptrunning == 'CW ODMR' or self.exptrunning == 'Pulsed ODMR':
             data_avg['Frequency Axis'] = self.final_sweep_list
