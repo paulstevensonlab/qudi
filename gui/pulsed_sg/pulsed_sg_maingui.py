@@ -237,6 +237,9 @@ class PulsedMeasurementGui(GUIBase):
         self.ramseyparams = self._pulsed_logic.ramseyparams
         self._update_rabibox()
 
+        self.t1params = self._pulsed_logic.t1params
+        self._update_t1box()
+
         self.odmrparams = self._pulsed_logic.odmrparams
         self._update_odmrbox()
 
@@ -471,6 +474,8 @@ class PulsedMeasurementGui(GUIBase):
             elif self.expttorun == 'Hahn Echo':
                 print("Hahn Echo experiments will be implemented in a future edition")
             elif self.expttorun == 'Pulsed ODMR':
+                self.sigStartPulsed.emit()
+            elif self.expttorun == 'T1':
                 self.sigStartPulsed.emit()
             elif self.iscw:
                 self.expttorun = 'CW ODMR'
