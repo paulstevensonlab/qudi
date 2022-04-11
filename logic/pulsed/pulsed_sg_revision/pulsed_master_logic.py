@@ -558,10 +558,10 @@ class PulsedMasterLogic(GenericLogic):
         return [laser_rle, mw_rle, sync_rle]
 
     def t1_sequence(self,tau=100,taumax=2000):
-        totallength = self.pulselengths[2] + self.final_sweep_list.max() + 2*self.pi2_pulse + 50
+        totallength = self.pulselengths[2] + tau
         sync_patt = [(100, 1), (int(totallength - 100), 0)]
-        mw_patt = [(100, 0), (int(totallength - 100), 0)]
-        laser_patt = [(self.pulselengths[2], 1), (int(totallength - self.pulselengths[2]), 0)]
+        mw_patt = [(10, 1), (int(totallength - 10), 0)]
+        laser_patt = [(self.pulselengths[2], 1), (int(tau), 0)]
 
         laser_rle = self.traj_to_rle(np.roll(self.rle_to_traj(laser_patt), int(-1 * self.pulselengths[0])))
         mw_rle = self.traj_to_rle(np.roll(self.rle_to_traj(mw_patt), int(self.pulselengths[1])))
