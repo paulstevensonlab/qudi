@@ -856,7 +856,7 @@ class PulsedMeasurementGui(GUIBase):
         self._st_expt.spinbox_ramsey_rep.blockSignals(False)
         return
 
-    def _update_t1(self):
+    def _update_t1vals(self):
         self.t1params[0] = self._st_expt.spinbox_t1_start.value()
         self.t1params[1] = self._st_expt.spinbox_t1_stop.value()
         self.t1params[2] = self._st_expt.spinbox_t1_step.value()
