@@ -371,6 +371,7 @@ class PulsedMasterLogic(GenericLogic):
 
             if self._autotrack:
                 if np.mod(self.elapsed_sweeps, self._trackevery) == 0:
+                    self.pulsegenerator().set_continuous_out([1, 1, 1, 0, 0, 0, 0, 0])
                     self.module_state.unlock()
                     if self.optimiserlogic().module_state() == 'idle':
                         self.optimiserlogic().start_refocus(caller_tag='tracking')
