@@ -411,10 +411,6 @@ class PulsedMasterLogic(GenericLogic):
                     self.pulsed_raw_data[2, k, self.elapsed_sweeps] = (
                                 np.mean(self.fromcounter[0, st_inds[0]:st_inds[1]]) /
                                 np.mean(self.fromcounter[0, end_inds[0]:end_inds[1]]))
-                    ## Just for debugging
-                    if k == 0:
-                        self.pulsed_debugdata = np.zeros((self.final_sweep_list.size, self.number_of_lines,self.fromcounter.shape[1]))
-                    self.pulsed_debugdata[k,self.elapsed_sweeps,:] = self.fromcounter[0,:]
 
 
             elif self.scanvar == 'Freq':
