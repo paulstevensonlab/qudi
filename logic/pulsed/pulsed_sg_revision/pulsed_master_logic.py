@@ -386,7 +386,7 @@ class PulsedMasterLogic(GenericLogic):
                 st_inds = [0,int(self.cwparams[5]*1e9)-1]
                 end_inds = [int(self.cwparams[5]*1e9),int(2*self.cwparams[5]*1e9)-1]
             else:
-                st_inds = [0,int(self.pulselengths[3])]
+                st_inds = [80,int(80+self.pulselengths[3])]
                 end_inds = [int(self.pulselengths[2]-self.pulselengths[3]),int(self.pulselengths[2])]
 
             # This needs a case for scanning frequency - mostly for pulsed ODMR
@@ -514,7 +514,7 @@ class PulsedMasterLogic(GenericLogic):
         self.pulsegenerator().direct_write(self.sequence_dict)
         self.pulsegenerator().pulser_on()
 
-        totaltime = self.pulselengths[2] + self.final_sweep_list.max() + 2*self.pi2_pulse + 50
+        totaltime = self.pulselengths[2] + self.final_sweep_list.max()
         self.fastcounter().configure(1.e-9, 1e-9 * totaltime, 1)
         return 0
 
