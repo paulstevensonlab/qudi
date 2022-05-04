@@ -274,6 +274,7 @@ class PulsedMasterLogic(GenericLogic):
         return
 
     def start_pulsed_scan(self):
+
         with self.threadlock:
             if self.module_state() == 'locked':
                 self.log.error('Can not start another scan. Logic is already locked.')
@@ -345,6 +346,8 @@ class PulsedMasterLogic(GenericLogic):
 
             self.number_of_lines = int(self.exptparams[4])
             self.pulsed_raw_data = np.zeros((3, self.final_sweep_list.size, self.number_of_lines)) # will save sig, ref, and sig/ref
+            self.tt_output = self.templist = np.zeros(
+                (int(self.number_of_lines), int(self.totaltime+1), int(self.final_sweep_list.size)))
             self.sigExptRunningUpdated.emit(True)
             self.sigNextLinePulse.emit()
         return
@@ -389,10 +392,12 @@ class PulsedMasterLogic(GenericLogic):
                 st_inds = [0,int(self.cwparams[5]*1e9)-1]
                 end_inds = [int(self.cwparams[5]*1e9),int(2*self.cwparams[5]*1e9)-1]
             else:
-                st_inds = [80,int(80+self.pulselengths[3])]
+                st_inds = [100,int(100+self.pulselengths[3])]
                 end_inds = [int(self.pulselengths[2]-self.pulselengths[3]),int(self.pulselengths[2])]
 
             # This needs a case for scanning frequency - mostly for pulsed ODMR
+
+            self.templist = np.zeros((int(self.totaltime+1),int(self.final_sweep_list.size)))
 
             if self.scanvar == 'Time':
                 for k, tau in enumerate(self.final_sweep_list):
@@ -408,6 +413,7 @@ class PulsedMasterLogic(GenericLogic):
                     self.pulsegenerator().direct_write(self.sequence_dict)
                     self.pulsegenerator().pulser_on()
                     self.fromcounter = self.fastcounter().measure_for(self.exptparams[3])
+                    self.templist[:,k] = self.fromcounter
                     #
                     self.pulsed_raw_data[0, k, self.elapsed_sweeps] = np.mean(
                         self.fromcounter[0, st_inds[0]:st_inds[1]])
@@ -416,7 +422,7 @@ class PulsedMasterLogic(GenericLogic):
                     self.pulsed_raw_data[2, k, self.elapsed_sweeps] = (
                                 np.mean(self.fromcounter[0, st_inds[0]:st_inds[1]]) /
                                 np.mean(self.fromcounter[0, end_inds[0]:end_inds[1]]))
-
+                self.tt_output[self.elapsed_sweeps,:,:] = self.templist
 
             elif self.scanvar == 'Freq':
                 self.odmrlogic1()._mw_device.reset_sweeppos()
@@ -488,9 +494,8 @@ class PulsedMasterLogic(GenericLogic):
         self.pulsegenerator().direct_write(self.sequence_dict)
         self.pulsegenerator().pulser_on()
 
-        totaltime = self.pulselengths[2] + self.final_sweep_list.max() + 50
-        print(totaltime)
-        self.fastcounter().configure(1.e-9,1e-9*totaltime,1)
+        self.totaltime = self.pulselengths[2] + self.final_sweep_list.max() + 50
+        self.fastcounter().configure(1.e-9,1e-9*self.totaltime,1)
         return 0
 
     def _setup_ramsey(self):
@@ -502,8 +507,8 @@ class PulsedMasterLogic(GenericLogic):
         self.pulsegenerator().direct_write(self.sequence_dict)
         self.pulsegenerator().pulser_on()
 
-        totaltime = self.pulselengths[2] + self.final_sweep_list.max() + 2*self.pi2_pulse + 50
-        self.fastcounter().configure(1.e-9, 1e-9 * totaltime, 1)
+        self.totaltime = self.pulselengths[2] + self.final_sweep_list.max() + 2*self.pi2_pulse + 50
+        self.fastcounter().configure(1.e-9, 1e-9 * self.totaltime, 1)
         return 0
 
     def _setup_hahn(self):
@@ -515,8 +520,8 @@ class PulsedMasterLogic(GenericLogic):
         self.pulsegenerator().direct_write(self.sequence_dict)
         self.pulsegenerator().pulser_on()
 
-        totaltime = self.pulselengths[2] + 2*self.final_sweep_list.max() + 2*self.pi2_pulse  + self.pi_pulse + 50
-        self.fastcounter().configure(1.e-9, 1e-9 * totaltime, 1)
+        self.totaltime = self.pulselengths[2] + 2*self.final_sweep_list.max() + 2*self.pi2_pulse  + self.pi_pulse + 50
+        self.fastcounter().configure(1.e-9, 1e-9 * self.totaltime, 1)
         return 0
 
     def _setup_t1(self):
@@ -528,8 +533,8 @@ class PulsedMasterLogic(GenericLogic):
         self.pulsegenerator().direct_write(self.sequence_dict)
         self.pulsegenerator().pulser_on()
 
-        totaltime = self.pulselengths[2] + self.final_sweep_list.max()
-        self.fastcounter().configure(1.e-9, 1e-9 * totaltime, 1)
+        self.totaltime = self.pulselengths[2] + self.final_sweep_list.max()
+        self.fastcounter().configure(1.e-9, 1e-9 * self.totaltime, 1)
         return 0
 
     def _setup_odmr(self):
@@ -541,8 +546,8 @@ class PulsedMasterLogic(GenericLogic):
         self.pulsegenerator().direct_write(self.sequence_dict)
         self.pulsegenerator().pulser_on()
 
-        totaltime = self.pulselengths[2] + self.pi_pulse + 50.
-        self.fastcounter().configure(1.e-9, 1e-9 * totaltime, 1)
+        self.totaltime = self.pulselengths[2] + self.pi_pulse + 50.
+        self.fastcounter().configure(1.e-9, 1e-9 * self.totaltime, 1)
 
         mode, is_running = self.mw_sweep_on(self.odmrparams)
         if not is_running:
@@ -737,6 +742,7 @@ class PulsedMasterLogic(GenericLogic):
                                    delimiter='\t',
                                    timestamp=timestamp)
 
+
         data_raw = OrderedDict()
         data_raw['Reference data (counts/s)'] = (self.pulsed_raw_data[1, :, :].squeeze()).T
         filelabel_raw = '{0}_Pulsed_'.format(tag) + expt_add + '_rawRef'
@@ -770,6 +776,20 @@ class PulsedMasterLogic(GenericLogic):
                                    filepath=filepath,
                                    parameters=parameters,
                                    filelabel=filelabel_avg,
+                                   fmt='%.6e',
+                                   delimiter='\t',
+                                   timestamp=timestamp)
+
+        filepath = self._save_logic.get_path_for_module(module_name='TT_raw')
+        if tag is None:
+            tag = ''
+        expt_add = (self.exptrunning).replace(" ", "")
+        filelabel_raw = '{0}_Pulsed_'.format(tag) + expt_add + '_TT'
+        data_TT = OrderedDict()
+        data_TT['Raw TT'] = self.tt_output
+        self._save_logic.save_data(data_raw,
+                                   filepath=filepath,
+                                   filelabel=filelabel_raw,
                                    fmt='%.6e',
                                    delimiter='\t',
                                    timestamp=timestamp)
