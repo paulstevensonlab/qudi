@@ -397,7 +397,7 @@ class PulsedMasterLogic(GenericLogic):
 
             # This needs a case for scanning frequency - mostly for pulsed ODMR
 
-            self.templist = np.zeros((int(self.totaltime+1),int(self.final_sweep_list.size)))
+            #self.templist = np.zeros((int(self.totaltime+1),int(self.final_sweep_list.size)))
 
             if self.scanvar == 'Time':
                 for k, tau in enumerate(self.final_sweep_list):
@@ -413,7 +413,7 @@ class PulsedMasterLogic(GenericLogic):
                     self.pulsegenerator().direct_write(self.sequence_dict)
                     self.pulsegenerator().pulser_on()
                     self.fromcounter = self.fastcounter().measure_for(self.exptparams[3])
-                    self.templist[:,k] = self.fromcounter
+                    #self.templist[:,k] = self.fromcounter
                     #
                     self.pulsed_raw_data[0, k, self.elapsed_sweeps] = np.mean(
                         self.fromcounter[0, st_inds[0]:st_inds[1]])
