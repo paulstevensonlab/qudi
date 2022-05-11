@@ -66,7 +66,7 @@ class PulsedMasterLogic(GenericLogic):
     cwparams = StatusVar('CW ODMR params', [2.80e9,2.90e9,1.e6,0.1,1,1.e-5])  # start, stop, step, dwell per point, average, length of ref pulse
     rabiparams = StatusVar('Rabi params',[10., 1000., 10., 0.1, 1])  # start, stop, step, dwell per point, average
     ramseyparams = StatusVar('Ramsey params', [10., 1000., 10., 0.1, 1])  # start, stop, step, dwell per point, average
-    hahnparams = StatusVar('Hahn params', [10., 1000., 10., 0.1, 1])  # start, stop, step, dwell per point, average
+    hahnparams = StatusVar('Hahn params', [100., 3000., 100., 0.1, 1])  # start, stop, step, dwell per point, average
     t1params = StatusVar('T1 params', [10., 1000., 10., 0.1, 1])  # start, stop, step, dwell per point, average
     odmrparams = StatusVar('Pulsed ODMR params',[2.80e9,2.90e9,1.e6,0.1,1]) # start, stop, step, dwell per point, average
     expt_current = StatusVar('Standard Expt', 'Rabi')
@@ -259,6 +259,13 @@ class PulsedMasterLogic(GenericLogic):
         self.sigParameterUpdated.emit(update_dict)
         return
 
+    def set_hahn(self,hahnparams=None):
+        if hahnparams is not None:
+            self.hahnparams = hahnparams
+        update_dict = {'Hahn_params': self.hahnparams}
+        self.sigParameterUpdated.emit(update_dict)
+        return
+
     def set_t1(self,t1params=None):
         if t1params is not None:
             self.t1params = t1params
@@ -319,9 +326,15 @@ class PulsedMasterLogic(GenericLogic):
                 self.mw_cw_on()
                 ########
             elif self.expt_current == 'Hahn Echo':
-                self.scanvar = 'Freq'
-                self.stopRequested = True
-                print('I can only deal with Rabi experiments right now')
+                self.scanvar = 'Time'
+                self.exptparams = self.hahnparams
+                hahn_status = self._setup_hahn()
+                if hahn_status < 0:
+                    self.module_state_unlock()
+                    print('Issue with Hahn Echo - stop and think')
+                ##
+                self.mw_cw_on()
+                ##
             elif self.expt_current == 'CW ODMR':
                 self.scanvar = 'Freq'
                 self.exptparams = self.cwparams
@@ -406,7 +419,7 @@ class PulsedMasterLogic(GenericLogic):
                         self.sequence_dict['Levels'] = self.rabi_sequence(tau, self.final_sweep_list.max())
                     elif self.exptrunning == 'Ramsey':
                         self.sequence_dict['Levels'] = self.ramsey_sequence(tau,self.final_sweep_list.max())
-                    elif self.exptrunning == 'Hahn':
+                    elif self.exptrunning == 'Hahn Echo':
                         self.sequence_dict['Levels'] = self.hahn_sequence(tau,self.final_sweep_list.max())
                     elif self.exptrunning == 'T1':
                         self.sequence_dict['Levels'] = self.t1_sequence(tau,self.final_sweep_list.max())
@@ -558,10 +571,10 @@ class PulsedMasterLogic(GenericLogic):
     ### Sequence definitions
 
     def rabi_sequence(self,tau=100,taumax=2000):
-        totallength = self.pulselengths[2] + taumax + 50
+        totallength = self.pulselengths[2] + taumax + 100
         sync_patt = [(100,1),(int(totallength-100),0)]
-        mw_patt = [(int(self.pulselengths[2]+50),0),(int(tau),1),(int(totallength-self.pulselengths[2]-50-tau),0)]
-        laser_patt = [(self.pulselengths[2], 1), (int(totallength - self.pulselengths[2]), 0)]
+        mw_patt = [(int(self.pulselengths[2]+50),0),(int(tau),1),(int(totallength-self.pulselengths[2]-tau),0)]
+        laser_patt = [(self.pulselengths[2], 1), (int(totallength - self.pulselengths[2] + 50), 0)]
 
         laser_rle = self.traj_to_rle(np.roll(self.rle_to_traj(laser_patt), int(-1*self.pulselengths[0])))
         mw_rle = self.traj_to_rle(np.roll(self.rle_to_traj(mw_patt),int(self.pulselengths[1])))
@@ -570,12 +583,12 @@ class PulsedMasterLogic(GenericLogic):
         return [laser_rle,mw_rle,sync_rle]
 
     def ramsey_sequence(self,tau=100,taumax=2000):
-        totallength = self.pulselengths[2] + self.final_sweep_list.max() + 2*self.pi2_pulse + 50
+        totallength = self.pulselengths[2] + taumax + 2*self.pi2_pulse + 100
         sync_patt = [(100, 1), (int(totallength - 100), 0)]
         mw_patt = [(int(self.pulselengths[2] + 50), 0), (int(self.pi2_pulse), 1), (int(tau), 0),
                    (int(self.pi2_pulse), 1),
-                   (int(totallength - self.pulselengths[2] - 2 * self.pi2_pulse - 50 - tau), 0)]
-        laser_patt = [(self.pulselengths[2], 1), (int(totallength - self.pulselengths[2]), 0)]
+                   (int(totallength - self.pulselengths[2] - 2 * self.pi2_pulse - tau), 0)]
+        laser_patt = [(self.pulselengths[2], 1), (int(totallength - self.pulselengths[2] + 50), 0)]
 
         laser_rle = self.traj_to_rle(np.roll(self.rle_to_traj(laser_patt), int(-1 * self.pulselengths[0])))
         mw_rle = self.traj_to_rle(np.roll(self.rle_to_traj(mw_patt), int(self.pulselengths[1])))
@@ -584,12 +597,12 @@ class PulsedMasterLogic(GenericLogic):
         return [laser_rle, mw_rle, sync_rle]
 
     def hahn_sequence(self,tau=100,taumax=2000):
-        totallength = self.pulselengths[2] + 2*self.final_sweep_list.max() + 2*self.pi2_pulse  + self.pi_pulse + 50
+        totallength = self.pulselengths[2] + 2*taumax + 2*self.pi2_pulse  + self.pi_pulse + 100
         sync_patt = [(100, 1), (int(totallength - 100), 0)]
-        mw_patt = [(int(self.pulselengths[2] + 50), 0), (int(self.pi2_pulse), 1), (int(tau), 0), (int(self.pi_pulse),1), (int(tau),0)
+        mw_patt = [(int(self.pulselengths[2] + 50), 0), (int(self.pi2_pulse), 1), (int(tau), 0), (int(self.pi_pulse),1), (int(tau),0),
                    (int(self.pi2_pulse), 1),
-                   (int(totallength - self.pulselengths[2] - 2 * self.pi2_pulse - 50 - 2*tau - self.pi_pulse), 0)]
-        laser_patt = [(self.pulselengths[2], 1), (int(totallength - self.pulselengths[2]), 0)]
+                   (int(totallength - self.pulselengths[2] - 2 * self.pi2_pulse - 2*tau - self.pi_pulse), 0)]
+        laser_patt = [(self.pulselengths[2], 1), (int(totallength - self.pulselengths[2]+100), 0)]
 
         laser_rle = self.traj_to_rle(np.roll(self.rle_to_traj(laser_patt), int(-1 * self.pulselengths[0])))
         mw_rle = self.traj_to_rle(np.roll(self.rle_to_traj(mw_patt), int(self.pulselengths[1])))
@@ -610,10 +623,10 @@ class PulsedMasterLogic(GenericLogic):
         return [laser_rle, mw_rle, sync_rle]
 
     def odmr_sequence(self):
-        totallength = self.pulselengths[2] + self.pi_pulse + 50.
+        totallength = self.pulselengths[2] + self.pi_pulse + 100.
         sync_patt = [(100, 1), (int(totallength - 100), 0)]
         mw_patt = [(int(self.pulselengths[2] + 50), 0), (int(self.pi_pulse), 1)]
-        laser_patt = [(self.pulselengths[2], 1), (int(totallength - self.pulselengths[2]), 0)]
+        laser_patt = [(self.pulselengths[2], 1), (int(totallength - self.pulselengths[2]+100), 0)]
 
         laser_rle = self.traj_to_rle(np.roll(self.rle_to_traj(laser_patt), int(-1 * self.pulselengths[0])))
         mw_rle = self.traj_to_rle(np.roll(self.rle_to_traj(mw_patt), int(self.pulselengths[1])))
@@ -720,6 +733,13 @@ class PulsedMasterLogic(GenericLogic):
             parameters['Ramsey Stop (ns)'] = self.ramseyparams[1]
             parameters['Ramsey Step (ns)'] = self.ramseyparams[2]
             parameters['Experiment Type'] = 'Ramsey'
+            data_avg['Pulse Delay (ns)'] = self.final_sweep_list
+        elif self.exptrunning == 'Hahn Echo':
+            parameters['Microwave Frequency (Hz)'] = self.uw_frequency
+            parameters['Echo Start (ns)'] = self.ramseyparams[0]
+            parameters['Echo Stop (ns)'] = self.ramseyparams[1]
+            parameters['Echo Step (ns)'] = self.ramseyparams[2]
+            parameters['Experiment Type'] = 'Hahn Echo'
             data_avg['Pulse Delay (ns)'] = self.final_sweep_list
         elif self.exptrunning == 'T1':
             parameters['T1 Start (ns)'] = self.t1params[0]

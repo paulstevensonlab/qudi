@@ -108,9 +108,9 @@ class PulsedMeasurementGui(GUIBase):
         self.expttorun = 'Rabi'
         self.rabiparams = [10.,1000.,10.,0.1,1] # start, stop, step, dwell per point, average
         self.ramseyparams = [10., 1000., 10., 0.1, 1]  # start, stop, step, dwell per point, average
+        self.hahnparams = [100., 3000., 100., 0.1, 1]  # start, stop, step, dwell per point, average
         self.t1params = [10., 1000., 10., 0.1, 1]  # start, stop, step, dwell per point, average
         self.odmrparams = [2.80e9,2.90e9,1.e6,0.1,1]
-        self.expttorun = 'Rabi'
         self.pulselengths = [700,10,3000,300]
         self.pulseconfigs = [0,2,1]
         self.cwparams = [2.80e9,2.90e9,1.e6,0.1,1,1.e-5]
@@ -235,7 +235,10 @@ class PulsedMeasurementGui(GUIBase):
         self._update_rabibox()
 
         self.ramseyparams = self._pulsed_logic.ramseyparams
-        self._update_rabibox()
+        self._update_ramseybox()
+
+        self.hahnparams = self._pulsed_logic.hahnparams
+        self._update_hahnbox()
 
         self.t1params = self._pulsed_logic.t1params
         self._update_t1box()
@@ -388,6 +391,12 @@ class PulsedMeasurementGui(GUIBase):
         self._st_expt.spinbox_ramsey_step.editingFinished.connect(self._update_ramseyvals)
         self._st_expt.spinbox_ramsey_dwell.editingFinished.connect(self._update_ramseyvals)
         self._st_expt.spinbox_ramsey_rep.editingFinished.connect(self._update_ramseyvals)
+        # Hahn
+        self._st_expt.spinbox_hahn_start.editingFinished.connect(self._update_hahnvals)
+        self._st_expt.spinbox_hahn_stop.editingFinished.connect(self._update_hahnvals)
+        self._st_expt.spinbox_hahn_step.editingFinished.connect(self._update_hahnvals)
+        self._st_expt.spinbox_hahn_dwell.editingFinished.connect(self._update_hahnvals)
+        self._st_expt.spinbox_hahn_rep.editingFinished.connect(self._update_hahnvals)
         # T1
         self._st_expt.spinbox_t1_start.editingFinished.connect(self._update_t1vals)
         self._st_expt.spinbox_t1_stop.editingFinished.connect(self._update_t1vals)
@@ -464,6 +473,18 @@ class PulsedMeasurementGui(GUIBase):
             self._st_expt.spinbox_odmr_step.setEnabled(False)
             self._st_expt.spinbox_odmr_dwell.setEnabled(False)
             self._st_expt.spinbox_odmr_rep.setEnabled(False)
+            ## Hahn Echo ##
+            self._st_expt.spinbox_hahn_start.setEnabled(False)
+            self._st_expt.spinbox_hahn_stop.setEnabled(False)
+            self._st_expt.spinbox_hahn_step.setEnabled(False)
+            self._st_expt.spinbox_hahn_dwell.setEnabled(False)
+            self._st_expt.spinbox_hahn_rep.setEnabled(False)
+            ## T1 ##
+            self._st_expt.spinbox_t1_start.setEnabled(False)
+            self._st_expt.spinbox_t1_stop.setEnabled(False)
+            self._st_expt.spinbox_t1_step.setEnabled(False)
+            self._st_expt.spinbox_t1_dwell.setEnabled(False)
+            self._st_expt.spinbox_t1_rep.setEnabled(False)
 
             # now start to run
             self.expttorun = self._st_expt.combo_exptchoice.currentText()
@@ -472,7 +493,7 @@ class PulsedMeasurementGui(GUIBase):
             elif self.expttorun == 'Ramsey':
                 self.sigStartPulsed.emit()
             elif self.expttorun == 'Hahn Echo':
-                print("Hahn Echo experiments will be implemented in a future edition")
+                self.sigStartPulsed.emit()
             elif self.expttorun == 'Pulsed ODMR':
                 self.sigStartPulsed.emit()
             elif self.expttorun == 'T1':
@@ -510,21 +531,6 @@ class PulsedMeasurementGui(GUIBase):
 
 ## Main Window Related Methods
     def update_plots(self,pulsed_data_x,pulsed_data_y,pulsed_data_xy):
-
-        # if self._pulsed_logic.exptrunning == 'Rabi' or self._pulsed_logic.exptrunning == 'Ramsey':
-        #     self.units = 'ns'
-        #     self.label = 'Time'
-        # elif self._pulsed_logic.exptrunning == 'CW ODMR' or self._pulsed_logic.exptrunning == 'Pulsed ODMR':
-        #     self.units = 'Hz'
-        #     self.label = 'Frequency'
-        # else:
-        #     self.units = 'AU'
-        #     self.label = 'Scan'
-        #     return
-        #
-        # self._st_expt.pulsed_PlotWidget.getPlotItem().setLabel('bottom',text=self.label,units=self.units)
-        # self._cwodmr.pulsed_PlotWidget.getPlotItem().setLabel('bottom', text=self.label, units=self.units)
-
 
         self.pulsed_image.setData(pulsed_data_x,pulsed_data_y[2,:])
         self.pulsed_image2.setData(pulsed_data_x, pulsed_data_y[2, :])
@@ -622,6 +628,18 @@ class PulsedMeasurementGui(GUIBase):
             self._st_expt.spinbox_odmr_dwell.setEnabled(True)
             self._st_expt.spinbox_odmr_step.setEnabled(True)
             self._st_expt.spinbox_odmr_rep.setEnabled(True)
+            ## Hahn Echo ##
+            self._st_expt.spinbox_hahn_start.setEnabled(True)
+            self._st_expt.spinbox_hahn_stop.setEnabled(True)
+            self._st_expt.spinbox_hahn_dwell.setEnabled(True)
+            self._st_expt.spinbox_hahn_step.setEnabled(True)
+            self._st_expt.spinbox_hahn_rep.setEnabled(True)
+            ## Pulsed ODMR ##
+            self._st_expt.spinbox_t1_start.setEnabled(True)
+            self._st_expt.spinbox_t1_stop.setEnabled(True)
+            self._st_expt.spinbox_t1_dwell.setEnabled(True)
+            self._st_expt.spinbox_t1_step.setEnabled(True)
+            self._st_expt.spinbox_t1_rep.setEnabled(True)
 
         self._mw.action_run_stop.blockSignals(False)
         return
@@ -861,6 +879,37 @@ class PulsedMeasurementGui(GUIBase):
         self._st_expt.spinbox_ramsey_rep.blockSignals(False)
         return
 
+    def _update_hahnvals(self):
+        self.hahnparams[0] = self._st_expt.spinbox_hahn_start.value()
+        self.hahnparams[1] = self._st_expt.spinbox_hahn_stop.value()
+        self.hahnparams[2] = self._st_expt.spinbox_hahn_step.value()
+        self.hahnparams[3] = self._st_expt.spinbox_hahn_dwell.value()
+        self.hahnparams[4] = self._st_expt.spinbox_hahn_rep.value()
+        self._pulsed_logic.set_hahn(self.hahnparams)
+        return
+
+    def _update_hahnbox(self):
+        self._st_expt.spinbox_hahn_start.blockSignals(True)
+        self._st_expt.spinbox_hahn_start.setValue(self.hahnparams[0])
+        self._st_expt.spinbox_hahn_start.blockSignals(False)
+
+        self._st_expt.spinbox_hahn_stop.blockSignals(True)
+        self._st_expt.spinbox_hahn_stop.setValue(self.hahnparams[1])
+        self._st_expt.spinbox_hahn_stop.blockSignals(False)
+
+        self._st_expt.spinbox_hahn_step.blockSignals(True)
+        self._st_expt.spinbox_hahn_step.setValue(self.hahnparams[2])
+        self._st_expt.spinbox_hahn_step.blockSignals(False)
+
+        self._st_expt.spinbox_hahn_dwell.blockSignals(True)
+        self._st_expt.spinbox_hahn_dwell.setValue(self.hahnparams[3])
+        self._st_expt.spinbox_hahn_dwell.blockSignals(False)
+
+        self._st_expt.spinbox_hahn_rep.blockSignals(True)
+        self._st_expt.spinbox_hahn_rep.setValue(self.hahnparams[4])
+        self._st_expt.spinbox_hahn_rep.blockSignals(False)
+        return
+
     def _update_t1vals(self):
         self.t1params[0] = self._st_expt.spinbox_t1_start.value()
         self.t1params[1] = self._st_expt.spinbox_t1_stop.value()
@@ -978,6 +1027,11 @@ class PulsedMeasurementGui(GUIBase):
         if param is not None:
             self.odmrparams = param
             self._update_odmrbox()
+
+        param = param_dict.get('Hahn_params')
+        if param is not None:
+            self.hahnparams = param
+            self._update_hahnbox()
 
         param = param_dict.get('Pulse_lengths')
         if param is not None:
