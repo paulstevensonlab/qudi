@@ -616,7 +616,7 @@
         <item row="2" column="3">
          <widget class="QLabel" name="label_30">
           <property name="text">
-           <string>Repititions</string>
+           <string>Repetitions</string>
           </property>
          </widget>
         </item>
