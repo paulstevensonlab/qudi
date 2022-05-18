@@ -361,8 +361,8 @@ class PulsedMasterLogic(GenericLogic):
 
             self.number_of_lines = int(self.exptparams[4])
             self.pulsed_raw_data = np.zeros((3, self.final_sweep_list.size, self.number_of_lines)) # will save sig, ref, and sig/ref
-            self.tt_output = np.zeros(
-                (int(self.number_of_lines), int(self.totaltime+1), int(self.final_sweep_list.size)))
+            # self.tt_output = np.zeros(
+            #     (int(self.number_of_lines), int(self.totaltime+1), int(self.final_sweep_list.size)))
             self.sigExptRunningUpdated.emit(True)
             self.sigNextLinePulse.emit()
         return
@@ -412,7 +412,7 @@ class PulsedMasterLogic(GenericLogic):
 
             # This needs a case for scanning frequency - mostly for pulsed ODMR
 
-            self.templist = np.zeros((int(self.totaltime+1),int(self.final_sweep_list.size)))
+            # self.templist = np.zeros((int(self.totaltime+1),int(self.final_sweep_list.size)))
 
             if self.scanvar == 'Time':
                 for k, tau in enumerate(self.final_sweep_list):
@@ -428,7 +428,7 @@ class PulsedMasterLogic(GenericLogic):
                     self.pulsegenerator().direct_write(self.sequence_dict)
                     self.pulsegenerator().pulser_on()
                     self.fromcounter = self.fastcounter().measure_for(self.exptparams[3])
-                    self.templist[:,k] = self.fromcounter
+                    # self.templist[:,k] = self.fromcounter
                     #
                     self.pulsed_raw_data[0, k, self.elapsed_sweeps] = np.mean(
                         self.fromcounter[0, st_inds[0]:st_inds[1]])
@@ -437,7 +437,7 @@ class PulsedMasterLogic(GenericLogic):
                     self.pulsed_raw_data[2, k, self.elapsed_sweeps] = (
                                 np.mean(self.fromcounter[0, st_inds[0]:st_inds[1]]) /
                                 np.mean(self.fromcounter[0, end_inds[0]:end_inds[1]]))
-                self.tt_output[self.elapsed_sweeps,:,:] = self.templist
+                # self.tt_output[self.elapsed_sweeps,:,:] = self.templist
 
             elif self.scanvar == 'Freq':
                 self.odmrlogic1()._mw_device.reset_sweeppos()
@@ -802,16 +802,16 @@ class PulsedMasterLogic(GenericLogic):
                                    delimiter='\t',
                                    timestamp=timestamp)
 
-        filepath_TT = self._save_logic.get_path_for_module(module_name='TT_raw')
-        if tag is None:
-            tag = ''
-        expt_add = (self.exptrunning).replace(" ", "")
-        filename_raw_TT = timestamp.strftime('%Y%m%d-%H%M-%S') + '_' + '{0}_Pulsed_'.format(tag) + expt_add + '_TT' + '.npy'
-        fullpath_TT = os.path.join(filepath_TT, filename_raw_TT)
-        # _save_logic.save_data does not permit 3D arrays, see e.g.
-        # "Found data array with dimension >2. Unable to save data."
-        with open(fullpath_TT, 'wb') as fp:
-            np.save(fp, self.tt_output)
+        # filepath_TT = self._save_logic.get_path_for_module(module_name='TT_raw')
+        # if tag is None:
+        #     tag = ''
+        # expt_add = (self.exptrunning).replace(" ", "")
+        # filename_raw_TT = timestamp.strftime('%Y%m%d-%H%M-%S') + '_' + '{0}_Pulsed_'.format(tag) + expt_add + '_TT' + '.npy'
+        # fullpath_TT = os.path.join(filepath_TT, filename_raw_TT)
+        # # _save_logic.save_data does not permit 3D arrays, see e.g.
+        # # "Found data array with dimension >2. Unable to save data."
+        # with open(fullpath_TT, 'wb') as fp:
+        #     np.save(fp, self.tt_output)
         return
 
 
