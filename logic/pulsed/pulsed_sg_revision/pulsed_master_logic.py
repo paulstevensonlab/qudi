@@ -806,12 +806,12 @@ class PulsedMasterLogic(GenericLogic):
         if tag is None:
             tag = ''
         expt_add = (self.exptrunning).replace(" ", "")
-        filename_raw_TT = timestamp.strftime('%Y%m%d-%H%M-%S') + '_' + '{0}_Pulsed_'.format(tag) + expt_add + '_TT' + '.mat'
-        data_TT = {'tt_output': self.tt_output}
+        filename_raw_TT = timestamp.strftime('%Y%m%d-%H%M-%S') + '_' + '{0}_Pulsed_'.format(tag) + expt_add + '_TT' + '.npy'
         fullpath_TT = os.path.join(filepath_TT, filename_raw_TT)
         # _save_logic.save_data does not permit 3D arrays, see e.g.
         # "Found data array with dimension >2. Unable to save data."
-        scipy.io.savemat(fullpath_TT, data_TT)
+        with open(fullpath_TT, 'wb') as fp:
+            np.save(fp, self.tt_output)
         return
 
 
