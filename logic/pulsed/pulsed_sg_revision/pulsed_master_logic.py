@@ -800,16 +800,16 @@ class PulsedMasterLogic(GenericLogic):
                                    delimiter='\t',
                                    timestamp=timestamp)
 
-        filepath = self._save_logic.get_path_for_module(module_name='TT_raw')
+        filepath_TT = self._save_logic.get_path_for_module(module_name='TT_raw')
         if tag is None:
             tag = ''
         expt_add = (self.exptrunning).replace(" ", "")
-        filelabel_raw = '{0}_Pulsed_'.format(tag) + expt_add + '_TT'
+        filelabel_raw_TT = '{0}_Pulsed_'.format(tag) + expt_add + '_TT'
         data_TT = OrderedDict()
         data_TT['Raw TT'] = self.tt_output
-        self._save_logic.save_data(data_raw,
-                                   filepath=filepath,
-                                   filelabel=filelabel_raw,
+        self._save_logic.save_data(data_TT,
+                                   filepath=filepath_TT,
+                                   filelabel=filelabel_raw_TT,
                                    fmt='%.6e',
                                    delimiter='\t',
                                    timestamp=timestamp)
