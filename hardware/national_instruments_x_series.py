@@ -35,7 +35,7 @@ from interface.confocal_scanner_interface import ConfocalScannerInterface
 
 
 class NationalInstrumentsXSeries(Base, SlowCounterInterface, ConfocalScannerInterface, ODMRCounterInterface):
-    """ A National Instruments device that can count and control microvave generators.
+    """ A National Instruments device that can count and control microwave generators.
 
     !!!!!! NI USB 63XX, NI PCIe 63XX and NI PXIe 63XX DEVICES ONLY !!!!!!
 
