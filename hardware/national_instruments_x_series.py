@@ -2155,7 +2155,7 @@ class NationalInstrumentsXSeries(Base, SlowCounterInterface, ConfocalScannerInte
                 return _gated_count_data
         except:
             self.log.exception('Error while reading gated count data.')
-            return np.array([-1])
+            return np.array([])
 
     def stop_gated_counter(self):
         """Actually start the preconfigured counter task
