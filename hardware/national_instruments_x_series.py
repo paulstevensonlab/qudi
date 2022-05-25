@@ -1997,6 +1997,11 @@ class NationalInstrumentsXSeries(Base, SlowCounterInterface, ConfocalScannerInte
             # TODO: is there a better way to do this than just picking the first one?
         )
 
+    def gated_counter_set_pause_trigger(self, src):
+        daq.DAQmxSetDigLvlPauseTrigSrc(self._gated_counter_daq_task, src)
+        daq.DAQmxSetPauseTrigType(self._gated_counter_daq_task, daq.DAQmx_Val_DigLvl)
+        daq.DAQmxSetDigLvlPauseTrigWhen(self._gated_counter_daq_task, daq.DAQmx_Val_Low)
+
     # def set_up_gated_counter(self, buffer_length, read_available_samples=False):
     #     """ Initializes and starts task for external gated photon counting.
     #
