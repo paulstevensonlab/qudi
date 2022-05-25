@@ -2099,10 +2099,10 @@ class NationalInstrumentsXSeries(Base, SlowCounterInterface, ConfocalScannerInte
         return 0
 
 
-    def get_gated_counts(self, samples=None, timeout=None, read_available_samples=False):
+    def get_gated_counts(self, samples, timeout=None, read_available_samples=False):
         """ Returns latest count samples acquired by gated photon counting.
 
-        @param int samples: if defined, number of samples to read in one go.
+        @param int samples: Number of samples to read in one go.
                             How many samples are read per readout cycle. The
                             readout frequency was defined in the counter setup.
                             That sets also the length of the readout array.
@@ -2115,10 +2115,6 @@ class NationalInstrumentsXSeries(Base, SlowCounterInterface, ConfocalScannerInte
                                              what is in buffer until 'samples'
                                              is full.
         """
-        if samples is None:
-            samples = int(self._samples_number)
-        else:
-            samples = int(samples)
 
         if timeout is None:
             timeout = self._RWTimeout
