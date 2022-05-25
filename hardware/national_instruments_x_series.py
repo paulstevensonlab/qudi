@@ -2124,7 +2124,7 @@ class NationalInstrumentsXSeries(Base, SlowCounterInterface, ConfocalScannerInte
             timeout = self._RWTimeout
 
         # Count data will be written here
-        _gated_count_data = np.zeros([2,samples], dtype=np.uint32)
+        gated_count_data = np.zeros(samples, dtype=np.uint32)
 
         # Number of samples which were read will be stored here
         n_read_samples = daq.int32()
@@ -2142,15 +2142,15 @@ class NationalInstrumentsXSeries(Base, SlowCounterInterface, ConfocalScannerInte
                 self._gated_counter_daq_task, # taskHandle
                 num_samples, # numSampsPerChan, -1 reads all available samples
                 timeout, # timeout, maximum time in seconds to wait for readout
-                _gated_count_data[0], # output array for counts
+                gated_count_data, # output array for counts
                 samples, # arraySizeInSamps, size of the array in samples
-                daq.byref(n_read_samples), # sampsPerChanRead, number of samples which were actually read
+                daq.byref(n_read_samples), # output value sampsPerChanRead, number of samples which were actually read
                 None # Reserved for future use. Pass NULL (here None) to this parameter
             )
             # Chops the array or read sample to the length that it exactly returns
             # acquired data and not more
             if read_available_samples:
-                return _gated_count_data[0][:n_read_samples.value], n_read_samples.value
+                return gated_count_data[:n_read_samples.value], n_read_samples.value
             else:
                 return _gated_count_data
         except:
