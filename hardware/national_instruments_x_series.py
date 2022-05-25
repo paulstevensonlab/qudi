@@ -2152,7 +2152,7 @@ class NationalInstrumentsXSeries(Base, SlowCounterInterface, ConfocalScannerInte
             if read_available_samples:
                 return gated_count_data[:n_read_samples.value], n_read_samples.value
             else:
-                return _gated_count_data
+                return gated_count_data
         except:
             self.log.exception('Error while reading gated count data.')
             return np.array([])
