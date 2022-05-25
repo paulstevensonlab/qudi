@@ -2139,21 +2139,14 @@ class NationalInstrumentsXSeries(Base, SlowCounterInterface, ConfocalScannerInte
             num_samples = int(samples)
         try:
             daq.DAQmxReadCounterU32(
-                # read from this task
-                self._gated_counter_daq_task,
-                # read number samples
-                num_samples,
-                # maximal timeout for the read process
-                timeout,
-                _gated_count_data[0],
-                # write into this array
-                # length of array to write into
-                samples,
-                # number of samples which were actually read.
-                daq.byref(n_read_samples),
-                # Reserved for future use. Pass NULL (here None) to this parameter
-                None)
-
+                self._gated_counter_daq_task, # taskHandle
+                num_samples, # numSampsPerChan, -1 reads all available samples
+                timeout, # timeout, maximum time in seconds to wait for readout
+                _gated_count_data[0], # output array for counts
+                samples, # arraySizeInSamps, size of the array in samples
+                daq.byref(n_read_samples), # sampsPerChanRead, number of samples which were actually read
+                None # Reserved for future use. Pass NULL (here None) to this parameter
+            )
             # Chops the array or read sample to the length that it exactly returns
             # acquired data and not more
             if read_available_samples:
