@@ -2124,7 +2124,7 @@ class NationalInstrumentsXSeries(Base, SlowCounterInterface, ConfocalScannerInte
             timeout = self._RWTimeout
 
         # Count data will be written here
-        _gated_count_data = np.empty([2,samples], dtype=np.uint32)
+        _gated_count_data = np.zeros([2,samples], dtype=np.uint32)
 
         # Number of samples which were read will be stored here
         n_read_samples = daq.int32()
