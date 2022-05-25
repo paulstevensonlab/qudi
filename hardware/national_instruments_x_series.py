@@ -1989,10 +1989,12 @@ class NationalInstrumentsXSeries(Base, SlowCounterInterface, ConfocalScannerInte
             log.warning("DAQmxCreateCICountEdgesChan() returned '{}'".format(status))
 
         # Set the source.
+
         daq.DAQmxSetCICountEdgesTerm(
             self._gated_counter_daq_task, # taskHandle
             gated_counter_channel,
-            "/Dev1/PFI1"
+            self._photon_sources[0] # connection from the photon detector, e.g. "/Dev1/PFI1"
+            # TODO: is there a better way to do this than just picking the first one?
         )
 
     # def set_up_gated_counter(self, buffer_length, read_available_samples=False):
