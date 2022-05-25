@@ -1988,6 +1988,13 @@ class NationalInstrumentsXSeries(Base, SlowCounterInterface, ConfocalScannerInte
         elif status > 0:
             log.warning("DAQmxCreateCICountEdgesChan() returned '{}'".format(status))
 
+        # Set the source.
+        daq.DAQmxSetCICountEdgesTerm(
+            self._gated_counter_daq_task, # taskHandle
+            gated_counter_channel,
+            "/Dev1/PFI1"
+        )
+
     # def set_up_gated_counter(self, buffer_length, read_available_samples=False):
     #     """ Initializes and starts task for external gated photon counting.
     #
