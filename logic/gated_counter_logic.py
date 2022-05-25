@@ -39,6 +39,7 @@ class GatedCounterLogic(GenericLogic):
     odmrlogic1 = Connector(interface='ODMRLogic')
     savelogic = Connector(interface='SaveLogic')
     optimiserlogic = Connector(interface='OptimizerLogic')
+    connectorlogic = Connector(interface='CounterLogic')
 
 
 
