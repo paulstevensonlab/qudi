@@ -141,6 +141,7 @@ class NationalInstrumentsXSeries(Base, SlowCounterInterface, ConfocalScannerInte
         self._odmr_pulser_daq_task = None
         self._oversampling = 0
         self._lock_in_active = False
+        self._daq = daq
 
         self._photon_sources = self._photon_sources if self._photon_sources is not None else list()
         self._scanner_counter_channels = self._scanner_counter_channels if self._scanner_counter_channels is not None else list()
