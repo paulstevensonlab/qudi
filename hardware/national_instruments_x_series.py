@@ -1990,14 +1990,18 @@ class NationalInstrumentsXSeries(Base, SlowCounterInterface, ConfocalScannerInte
         elif status > 0:
             self.log.warning("DAQmxCreateCICountEdgesChan() returned '{}'".format(status))
 
+        # Set the source so it counts photons.
         daq.DAQmxSetCICountEdgesTerm(
             self._gated_counter_daq_task, # taskHandle
             gated_counter_channel,
             self._photon_sources[0] # connection from the photon detector, e.g. "/Dev1/PFI1"
             # TODO: is there a better way to do this than just picking the first one?
         )
+        # TODO: does DAQmxSetCICountEdgesTerm return a status that indicates success/failure?
+        return 0
 
     def gated_counter_set_pause_trigger(self, src):
+        # TODO: does this work for e.g. src = "/Dev1/PFI1"?
         daq.DAQmxSetDigLvlPauseTrigSrc(self._gated_counter_daq_task, src)
         daq.DAQmxSetPauseTrigType(self._gated_counter_daq_task, daq.DAQmx_Val_DigLvl)
         daq.DAQmxSetDigLvlPauseTrigWhen(self._gated_counter_daq_task, daq.DAQmx_Val_Low)
