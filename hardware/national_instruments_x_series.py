@@ -1969,13 +1969,14 @@ class NationalInstrumentsXSeries(Base, SlowCounterInterface, ConfocalScannerInte
             daq.byref(self._gated_counter_daq_task),
         )
         if status < 0:
-            raise ValueError("DAQmxCreateTask() returned '{}'".format(status))
+            self.log.exception("DAQmxCreateTask() returned '{}'".format(status))
+            return status
         elif status > 0:
-            log.warning("DAQmxCreateTask() returned '{}'".format(status))
+            self.log.warning("DAQmxCreateTask() returned '{}'".format(status))
 
         init_count = 0
         gated_counter_channel = self._counter_channels[0]  # TODO: is there a better way to do this than just picking the first one?
-        status = daq.DAQmxCreateCICountEdgesChan(
+        status = daq.DAQmxCreateCICountEdgesChan( # create virtual channel, counter input, count edges
             self._gated_counter_daq_task, # taskHandle
             gated_counter_channel, # counter, name of the counter to use to create virtual channels
             'Gated Counting Task', # nameToAssignToChannel
@@ -1984,11 +1985,10 @@ class NationalInstrumentsXSeries(Base, SlowCounterInterface, ConfocalScannerInte
             daq.DAQmx_Val_CountUp, # countDirection, up or down
         )
         if status < 0:
-            raise ValueError("DAQmxCreateCICountEdgesChan() returned '{}'".format(status))
+            self.log.exception("DAQmxCreateCICountEdgesChan() returned '{}'".format(status))
+            return status
         elif status > 0:
-            log.warning("DAQmxCreateCICountEdgesChan() returned '{}'".format(status))
-
-        # Set the source.
+            self.log.warning("DAQmxCreateCICountEdgesChan() returned '{}'".format(status))
 
         daq.DAQmxSetCICountEdgesTerm(
             self._gated_counter_daq_task, # taskHandle
