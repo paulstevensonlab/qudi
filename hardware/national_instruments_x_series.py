@@ -2117,6 +2117,30 @@ class NationalInstrumentsXSeries(Base, SlowCounterInterface, ConfocalScannerInte
             return -1
         return 0
 
+    def get_gated_count(self, timeout=None):
+        """ Returns total count acquired by gated photon counting.
+
+        @param float64 timeout: Maximal timeout for the read process, in seconds.
+                                Pass -1 for an infinite timeout.
+        """
+
+        if timeout is None:
+            timeout = self._RWTimeout
+
+        counts = daq.c_uint32()
+
+        status = daq.DAQmxReadCounterScalarU32(
+            self._gated_counter_daq_task,  # taskHandle
+            timeout, # in seconds
+            counts, # count
+            None, # reserved, pass NULL/none
+        )
+        if status < 0:
+            self.log.exception("DAQmxReadCounterScalarU32() returned '{}'".format(status))
+            return status
+        elif status > 0:
+            self.log.warning("DAQmxReadCounterScalarU32() returned '{}'".format(status))
+        return counts.value
 
     def get_gated_counts(self, samples, timeout=None, read_available_samples=False):
         """ Returns latest count samples acquired by gated photon counting.
