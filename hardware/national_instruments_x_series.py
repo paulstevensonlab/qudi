@@ -2234,6 +2234,19 @@ class NationalInstrumentsXSeries(Base, SlowCounterInterface, ConfocalScannerInte
             retval = -1
         return retval
 
+    def test_gated_counter(self, src, duration=1., n_iter=10):
+        import time
+        counts = []
+        for i in range(n_iter):
+            self.set_up_gated_counter()
+            self.gated_counter_set_pause_trigger(src=src)
+            self.start_gated_counter()
+            time.sleep(duration)
+            gated_count = self.get_gated_count()
+            self.stop_gated_counter()
+            print("{}\t{}".format(i, gated_count))
+            counts.append(gated_count)
+            self.close_gated_counter()
 
     # ======================== Digital channel control ==========================
 
