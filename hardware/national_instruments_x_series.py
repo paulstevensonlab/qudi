@@ -1962,11 +1962,11 @@ class NationalInstrumentsXSeries(Base, SlowCounterInterface, ConfocalScannerInte
 
     # ======================== Gated photon counting ==========================
 
-    def set_up_gated_counter(self):
+    def set_up_gated_counter(self, task_name="GatedCounter", channel_name="Gated Counting Task"):
         self._gated_counter_daq_task = daq.TaskHandle()
         status = daq.DAQmxCreateTask(
-            'GatedCounter', # optional name for the task
-            daq.byref(self._gated_counter_daq_task),
+            task_name, # taskName (input), must be unique or pass '' for auto-generated name.
+            daq.byref(self._gated_counter_daq_task), # taskHandle (output), passed pointer will be overwritten
         )
         if status < 0:
             self.log.exception("DAQmxCreateTask() returned '{}'".format(status))
@@ -1979,7 +1979,7 @@ class NationalInstrumentsXSeries(Base, SlowCounterInterface, ConfocalScannerInte
         status = daq.DAQmxCreateCICountEdgesChan( # create virtual channel, counter input, count edges
             self._gated_counter_daq_task, # taskHandle
             gated_counter_channel, # counter, name of the counter to use to create virtual channels
-            'Gated Counting Task', # nameToAssignToChannel
+            channel_name, # nameToAssignToChannel
             daq.DAQmx_Val_Rising, # rising or falling edge
             init_count, # initialCount, value to start counting from
             daq.DAQmx_Val_CountUp, # countDirection, up or down
