@@ -2001,7 +2001,6 @@ class NationalInstrumentsXSeries(Base, SlowCounterInterface, ConfocalScannerInte
         return 0
 
     def gated_counter_set_pause_trigger(self, src):
-        # TODO: does this work for e.g. src = "/Dev1/PFI1"?
         daq.DAQmxSetDigLvlPauseTrigSrc(self._gated_counter_daq_task, src)
         daq.DAQmxSetPauseTrigType(self._gated_counter_daq_task, daq.DAQmx_Val_DigLvl)
         daq.DAQmxSetDigLvlPauseTrigWhen(self._gated_counter_daq_task, daq.DAQmx_Val_Low)
@@ -2197,7 +2196,8 @@ class NationalInstrumentsXSeries(Base, SlowCounterInterface, ConfocalScannerInte
             return np.array([])
 
     def stop_gated_counter(self):
-        """Actually start the preconfigured counter task
+        """Stop the preconfigured counter task.
+        This resets the counter to zero.
 
         @return int: error code (0:OK, -1:error)
         """
