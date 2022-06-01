@@ -1962,6 +1962,12 @@ class NationalInstrumentsXSeries(Base, SlowCounterInterface, ConfocalScannerInte
 
     # ======================== Gated photon counting ==========================
 
+    class GatedCounter:
+        def __init__(self):
+            # Each gated counter needs a separate task.
+            self._task_handle = daq.TaskHandle()
+            raise NotImplementedError
+
     def set_up_gated_counter(self, task_name="GatedCounter", channel_name="Gated Counting Task"):
         self._gated_counter_daq_task = daq.TaskHandle()
         status = daq.DAQmxCreateTask(
