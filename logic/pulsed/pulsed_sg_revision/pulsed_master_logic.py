@@ -65,7 +65,7 @@ class PulsedMasterLogic(GenericLogic):
     do_channel_states = StatusVar('DO channel states', [0,0,0,0,0,0,0,0])
     pulselengths = StatusVar('Pulse Timing Parameters',[700,10,3000,300]) # aom delay, microwave delay, aom pulse length, integration time, all in nanoseconds
     pulseconfigs = StatusVar('Pulse Channel Configuration',[0,2,1]) # channels for AOM, microwave switch, gate/sync
-    cwparams = StatusVar('CW ODMR params', [2.80e9,2.90e9,1.e6,0.1,1,1.e-5])  # start, stop, step, dwell per point, average, length of ref pulse
+    cwparams = StatusVar('CW ODMR params', [2.80e9,2.90e9,1.e6,0.1,1,100.e-6])  # start, stop, step, dwell per point, average, length of ref pulse
     rabiparams = StatusVar('Rabi params',[10., 1000., 10., 0.1, 1])  # start, stop, step, dwell per point, average
     ramseyparams = StatusVar('Ramsey params', [10., 1000., 10., 0.1, 1])  # start, stop, step, dwell per point, average
     hahnparams = StatusVar('Hahn params', [100., 3000., 100., 0.1, 1])  # start, stop, step, dwell per point, average
