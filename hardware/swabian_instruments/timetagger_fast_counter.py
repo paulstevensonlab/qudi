@@ -24,7 +24,6 @@ import numpy as np
 import TimeTagger as tt
 from core.module import Base
 from core.configoption import ConfigOption
-import os
 
 
 class TimeTaggerFastCounter(Base, FastCounterInterface):
