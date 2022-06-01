@@ -1975,7 +1975,7 @@ class NationalInstrumentsXSeries(Base, SlowCounterInterface, ConfocalScannerInte
             self.log.warning("DAQmxCreateTask() returned '{}'".format(status))
 
         init_count = 0
-        gated_counter_channel = self._counter_channels[0]  # TODO: is there a better way to do this than just picking the first one?
+        gated_counter_channel = self._counter_channels[0]  # e.g. '/Dev1/Ctr1' TODO: is there a better way to do this than just picking the first one?
         status = daq.DAQmxCreateCICountEdgesChan( # create virtual channel, counter input, count edges
             self._gated_counter_daq_task, # taskHandle
             gated_counter_channel, # counter, name of the counter to use to create virtual channels
