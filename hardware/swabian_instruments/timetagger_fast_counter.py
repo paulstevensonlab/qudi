@@ -72,7 +72,7 @@ class TimeTaggerFastCounter(Base, FastCounterInterface):
         """ Retrieve the hardware constrains from the Fast counting device.
 
         @return dict: dict with keys being the constraint names as string and
-                      items are the definition for the constaints.
+                      items are the definition for the constraints.
 
          The keys of the returned dictionary are the str name for the constraints
         (which are set in this method).

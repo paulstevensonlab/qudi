@@ -28,7 +28,7 @@ class FastCounterInterface(metaclass=InterfaceMetaclass):
     """ Interface class to define the controls for fast counting devices.
 
     A "fast counter" is a hardware device that count events with a "good" time resolution.
-    The goal is generally to detect when events happen after an time defining trigger. These events can be photons
+    The goal is generally to detect when events happen after a time defining trigger. These events can be photons
     arrival on a detector for example, and the trigger the start of the acquisition.
     This type of hardware regularly records millions of repeated acquisition (ie sweeps) in a few seconds,
     with one or multiple events per trigger (depending on the hardware constrains).
@@ -36,7 +36,7 @@ class FastCounterInterface(metaclass=InterfaceMetaclass):
     - "Gated" : The result is a 2d array where each line correspond to a single trigger with one or multiple events
                 in each line/box
     - "Ungated" : Only the sum of the acquisition is acquired, building an histogram of the events times. This is
-                  generally enough for a lot of experiment, where a memory consuming 2d array is not necessary.
+                  generally enough for a lot of experiments, where a memory consuming 2d array is not necessary.
 
     """
 
