@@ -486,6 +486,14 @@ class PulsedMeasurementGui(GUIBase):
             self._st_expt.spinbox_t1_dwell.setEnabled(False)
             self._st_expt.spinbox_t1_rep.setEnabled(False)
 
+            ## CW ODMR ##
+            self._cwodmr.spinbox_odmr_start.setEnabled(False)
+            self._cwodmr.spinbox_odmr_stop.setEnabled(False)
+            self._cwodmr.spinbox_odmr_step.setEnabled(False)
+            self._cwodmr.spinbox_odmr_dwell.setEnabled(False)
+            self._cwodmr.spinbox_odmr_rep.setEnabled(False)
+            self._cwodmr.spinbox_odmr_ref.setEnabled(False)
+
             # now start to run
             self.expttorun = self._st_expt.combo_exptchoice.currentText()
             if self.expttorun == 'Rabi':
@@ -640,6 +648,13 @@ class PulsedMeasurementGui(GUIBase):
             self._st_expt.spinbox_t1_dwell.setEnabled(True)
             self._st_expt.spinbox_t1_step.setEnabled(True)
             self._st_expt.spinbox_t1_rep.setEnabled(True)
+            ## CW ODMR ##
+            self._cwodmr.spinbox_odmr_start.setEnabled(True)
+            self._cwodmr.spinbox_odmr_stop.setEnabled(True)
+            self._cwodmr.spinbox_odmr_step.setEnabled(True)
+            self._cwodmr.spinbox_odmr_dwell.setEnabled(True)
+            self._cwodmr.spinbox_odmr_rep.setEnabled(True)
+            self._cwodmr.spinbox_odmr_ref.setEnabled(True)
 
         self._mw.action_run_stop.blockSignals(False)
         return
