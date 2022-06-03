@@ -642,7 +642,7 @@ class PulsedMeasurementGui(GUIBase):
             self._st_expt.spinbox_hahn_dwell.setEnabled(True)
             self._st_expt.spinbox_hahn_step.setEnabled(True)
             self._st_expt.spinbox_hahn_rep.setEnabled(True)
-            ## Pulsed ODMR ##
+            ## T1 ##
             self._st_expt.spinbox_t1_start.setEnabled(True)
             self._st_expt.spinbox_t1_stop.setEnabled(True)
             self._st_expt.spinbox_t1_dwell.setEnabled(True)
