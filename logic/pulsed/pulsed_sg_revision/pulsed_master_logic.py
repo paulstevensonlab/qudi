@@ -117,7 +117,7 @@ class PulsedMasterLogic(GenericLogic):
                                                        QtCore.Qt.QueuedConnection)
 
         self.number_of_lines = self.rabiparams[4]
-        self.iscw = False
+        self.iscw = False # TODO: remove this unused function
         self.fname = ''
 
         if self.expt_current == 'Rabi':
@@ -196,7 +196,8 @@ class PulsedMasterLogic(GenericLogic):
     ###             Experiment methods                          ###
     #######################################################################
 
-    def set_cw(self,iscw):
+    # TODO: consider removing this unused function.
+    def set_iscw(self, iscw):
         if iscw is not None:
             self.iscw = iscw
         return
