@@ -360,7 +360,7 @@ class PulsedMasterLogic(GenericLogic):
             self._initialize_pulsed_plots()
             self.exptrunning = self.expt_current
 
-            self.number_of_lines = int(self.exptparams[4])
+            self.number_of_lines = self.exptparams[4]
             self.pulsed_raw_data = np.zeros((3, self.final_sweep_list.size, self.number_of_lines)) # will save sig, ref, and sig/ref
             # self.tt_output = np.zeros(
             #     (int(self.number_of_lines), int(self.totaltime+1), int(self.final_sweep_list.size)))
