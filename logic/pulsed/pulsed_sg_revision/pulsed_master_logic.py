@@ -364,7 +364,7 @@ class PulsedMasterLogic(GenericLogic):
             self.exptrunning = self.expt_current
 
             self.number_of_lines = self.exptparams[4]
-            self.log.info("start_pulsed_scan(): self.number_of_lines".format(self.number_of_lines))
+            self.log.info("start_pulsed_scan(): self.number_of_lines = {}".format(self.number_of_lines))
             self.pulsed_raw_data = np.zeros((3, self.final_sweep_list.size, self.number_of_lines)) # will save sig, ref, and sig/ref
             # self.tt_output = np.zeros(
             #     (int(self.number_of_lines), int(self.totaltime+1), int(self.final_sweep_list.size)))
