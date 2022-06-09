@@ -2093,7 +2093,10 @@ class NationalInstrumentsXSeries(Base, SlowCounterInterface, ConfocalScannerInte
                 counts.append(gated_count)
                 counter1.clear()
         except:
-            counter1.clear()
+            try:
+                counter1.clear()
+            except UnboundLocalError:
+                pass
             raise
 
 
@@ -2141,8 +2144,14 @@ class NationalInstrumentsXSeries(Base, SlowCounterInterface, ConfocalScannerInte
                 counter1.clear()
                 counter2.clear()
         except:
-            counter1.clear()
-            counter2.clear()
+            try:
+                counter1.clear()
+            except UnboundLocalError:
+                pass
+            try:
+                counter2.clear()
+            except UnboundLocalError:
+                pass
             raise
 
     # -----------------------------------------------------------------------------------------
