@@ -2004,18 +2004,17 @@ class NationalInstrumentsXSeries(Base, SlowCounterInterface, ConfocalScannerInte
             """
             daq.DAQmxCreateCICountEdgesChan(  # create virtual channel, counter input, count edges
                 self.task_handle,  # taskHandle
-                self.counter_channel,  # counter, name of the counter to use to create virtual channels
-                self.channel_name,  # nameToAssignToChannel
+                self.counter_channel,  # e.g. '/Dev1/Ctr1'
+                self.channel_name,  # nameToAssignToChannel, or empty string '' to auto-assign.
                 daq.DAQmx_Val_Rising,  # rising or falling edge
                 self.initial_count,  # initialCount, value to start counting from
                 daq.DAQmx_Val_CountUp,  # countDirection, up or down
             )
 
         def set_counter_source(self):
-            """Set the source so it counts photons.
+            """Set the counter so it counts photons.
             """
-            # "set counter input count edges terminal"
-            daq.DAQmxSetCICountEdgesTerm(
+            daq.DAQmxSetCICountEdgesTerm( # set counter input count edges terminal
                 self.task_handle, # taskHandle
                 self.counter_channel, # DAQ counter channel, e.g. '/Dev1/Ctr1'
                 self.photon_source # photon detector input, e.g. '/Dev1/PFI1'
@@ -2024,7 +2023,10 @@ class NationalInstrumentsXSeries(Base, SlowCounterInterface, ConfocalScannerInte
         def set_pause_trigger(self):
             """Set the counter so it only counts photons when the gating input is high.
             """
-            daq.DAQmxSetDigLvlPauseTrigSrc(self.task_handle, self.gating_source)
+            daq.DAQmxSetDigLvlPauseTrigSrc(
+                self.task_handle,
+                self.gating_source # e.g. '/Dev/PFI0'
+            )
             daq.DAQmxSetPauseTrigType(self.task_handle, daq.DAQmx_Val_DigLvl)
             daq.DAQmxSetDigLvlPauseTrigWhen(self.task_handle, daq.DAQmx_Val_Low)
 
