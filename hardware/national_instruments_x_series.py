@@ -2060,6 +2060,17 @@ class NationalInstrumentsXSeries(Base, SlowCounterInterface, ConfocalScannerInte
             """
             daq.DAQmxClearTask(self.task_handle)
 
+        def __str__(self):
+            out = ""
+            out += "task_handle = '{}'\n".format(self.task_handle)
+            out += "task_name = '{}'\n".format(self.task_name)
+            out += "counter_channel = '{}'\n".format(self.counter_channel)
+            out += "photon_source = '{}'\n".format(self.photon_source)
+            out += "gating_source = '{}'\n".format(self.gating_source)
+            out += "timeout = '{}' seconds\n".format(self.timeout)
+            out += "initial_count = '{}'\n".format(self.initial_count)
+            return out
+
     def test_gated_counter_class(self, gating_src='/Dev1/PFI0', duration=1., n_iter=10):
         import time
         counts = []
