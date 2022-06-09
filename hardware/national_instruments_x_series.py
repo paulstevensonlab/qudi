@@ -2111,7 +2111,7 @@ class NationalInstrumentsXSeries(Base, SlowCounterInterface, ConfocalScannerInte
         """
         if self._gated_counter_daq_task is None:
             self.log.error(
-                'Cannot start Gated Counter Task since it is notconfigured!\n'
+                'Cannot start Gated Counter Task since it is not configured!\n'
                 'Run the set_up_gated_counter routine.')
             return -1
 
