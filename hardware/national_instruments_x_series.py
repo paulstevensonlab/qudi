@@ -1983,7 +1983,7 @@ class NationalInstrumentsXSeries(Base, SlowCounterInterface, ConfocalScannerInte
             except:
                 # We must clear the task here,
                 # otherwise we might leave a task handle floating around.
-                # e.g. DuplicateTaskError
+                # e.g. DuplicateTaskError, PhysicalChanDoesNotExistError, PALResourceReservedError
                 self.clear()
                 # TODO: maybe be more specific with try/except,
                 #  e.g. daq.DAQException or daq.DAQError
