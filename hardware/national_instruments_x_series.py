@@ -2124,14 +2124,9 @@ class NationalInstrumentsXSeries(Base, SlowCounterInterface, ConfocalScannerInte
         try:
             for i in range(n_iter):
                 counter1 = self.GatedCounter(config1)
-                #print(counter1)
                 counter2 = self.GatedCounter(config2)
-                #print(counter2)
-                print("starting counter 1.")
                 counter1.start()
-                print("starting counter 2.")
                 counter2.start()
-                print("waiting...")
                 time.sleep(duration)
                 gated_count1 = counter1.get_gated_count()
                 gated_count2 = counter2.get_gated_count()
