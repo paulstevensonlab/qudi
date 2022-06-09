@@ -1962,11 +1962,125 @@ class NationalInstrumentsXSeries(Base, SlowCounterInterface, ConfocalScannerInte
 
     # ======================== Gated photon counting ==========================
 
-    class GatedCounter:
-        def __init__(self):
-            # Each gated counter needs a separate task.
-            self._task_handle = daq.TaskHandle()
-            raise NotImplementedError
+    class GatedCounterConfig(object):
+        # Just make this a container for attributes.
+        pass
+
+    class GatedCounter(object):
+        def __init__(self, config):
+            self.task_name = config.task_name # e.g. "Gated Counter"
+            self.counter_channel = config.counter_channel # e.g. '/Dev1/Ctr1'
+            self.channel_name = config.channel_name # e.g. "Gated Counting Task"
+            self.photon_source = config.photon_source # e.g. '/Dev/PFI1'
+            self.gating_source = config.gating_source # e.g. '/Dev/PFI0'
+            self.timeout = config.timeout
+            self.initial_count = 0 # start counter at 0.
+            try:
+                self.create_task()
+                self.set_channel()
+                self.set_counter_source()
+                self.set_pause_trigger()
+            except:
+                # We must clear the task here,
+                # otherwise we might leave a task handle floating around.
+                # e.g. DuplicateTaskError
+                self.clear()
+                # TODO: maybe be more specific with try/except,
+                #  e.g. daq.DAQException or daq.DAQError
+                raise
+
+        def create_task(self):
+            """Create a new task.
+            Each gated counter needs a separate task.
+            """
+            self.task_handle = daq.TaskHandle()
+            daq.DAQmxCreateTask(
+                self.task_name,  # taskName (input), must be unique or pass '' for auto-generated name.
+                daq.byref(self.task_handle),  # taskHandle (output), passed pointer will be overwritten
+            )
+
+        def set_channel(self):
+            """Set the channel so it counts rising edges.
+            """
+            daq.DAQmxCreateCICountEdgesChan(  # create virtual channel, counter input, count edges
+                self.task_handle,  # taskHandle
+                self.counter_channel,  # counter, name of the counter to use to create virtual channels
+                self.channel_name,  # nameToAssignToChannel
+                daq.DAQmx_Val_Rising,  # rising or falling edge
+                self.initial_count,  # initialCount, value to start counting from
+                daq.DAQmx_Val_CountUp,  # countDirection, up or down
+            )
+
+        def set_counter_source(self):
+            """Set the source so it counts photons.
+            """
+            daq.DAQmxSetCICountEdgesTerm(
+                self.task_handle, # taskHandle
+                self.counter_channel,
+                self.photon_source # connection from the photon detector, e.g. "/Dev1/PFI1"
+            )
+
+        def set_pause_trigger(self):
+            """Set the counter so it only counts photons when the gating input is high.
+            """
+            daq.DAQmxSetDigLvlPauseTrigSrc(self.task_handle, self.gating_source)
+            daq.DAQmxSetPauseTrigType(self.task_handle, daq.DAQmx_Val_DigLvl)
+            daq.DAQmxSetDigLvlPauseTrigWhen(self.task_handle, daq.DAQmx_Val_Low)
+
+        def start(self):
+            """Start the gated counter running.
+            """
+            daq.DAQmxStartTask(self.task_handle)
+
+        def get_gated_count(self):
+            """ Returns total count acquired by gated photon counting.
+
+            @param float64 timeout: Maximal timeout for the read process, in seconds.
+                                    Pass -1 for an infinite timeout.
+
+            @return uint32: count value
+            """
+            count = daq.c_uint32()
+            daq.DAQmxReadCounterScalarU32(
+                self.task_handle,  # taskHandle
+                self.timeout, # in seconds
+                count, # count
+                None, # reserved, pass NULL/none
+            )
+            return count.value
+
+        def stop(self):
+            """Stop the gated counter task.
+            This resets the counter to zero.
+            """
+            daq.DAQmxStopTask(self.task_handle)
+
+        def clear(self):
+            """ Clear gated counter task, so that counters are not in use any more.
+            """
+            daq.DAQmxClearTask(self.task_handle)
+
+    def test_gated_counter_class(self, gating_src='/Dev1/PFI0', duration=1., n_iter=10):
+        import time
+        counts = []
+        config1 = self.GatedCounterConfig()
+        config1.counter_channel = self._counter_channels[0]
+        config1.photon_source = self._photon_sources[0]
+        config1.gating_source = gating_src
+        config1.channel_name = "Gated Counting Task"
+        config1.task_name = "GatedCounter"
+        config1.timeout = self._RWTimeout
+        for i in range(n_iter):
+            counter1 = self.GatedCounter(config1)
+            counter1.start()
+            time.sleep(duration)
+            gated_count = counter1.get_gated_count()
+            counter1.stop()
+            print("{}\t{}".format(i, gated_count))
+            counts.append(gated_count)
+            counter1.clear()
+
+    # -----------------------------------------------------------------------------------------
 
     def set_up_gated_counter(self, task_name="GatedCounter", channel_name="Gated Counting Task"):
         self._gated_counter_daq_task = daq.TaskHandle()
