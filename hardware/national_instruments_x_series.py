@@ -2132,8 +2132,9 @@ class NationalInstrumentsXSeries(Base, SlowCounterInterface, ConfocalScannerInte
                 gated_count2 = counter2.get_gated_count()
                 counter1.stop()
                 counter2.stop()
-                print("signal\t{}\t{}".format(i, gated_count1))
-                print("reference\t{}\t{}".format(i, gated_count2))
+                diff = gated_count1 - gated_count2
+                percent_diff = diff/gated_count1
+                print("{}\t{}\t{}\t{}\t{:.2%}".format(i, gated_count1, gated_count2, diff, percent_diff))
                 counts1.append(gated_count1)
                 counts2.append(gated_count2)
                 counter1.clear()
