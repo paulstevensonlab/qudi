@@ -2078,18 +2078,72 @@ class NationalInstrumentsXSeries(Base, SlowCounterInterface, ConfocalScannerInte
         config1.counter_channel = self._counter_channels[0]
         config1.photon_source = self._photon_sources[0]
         config1.gating_source = gating_src
-        config1.channel_name = "Gated Counting Task"
+        config1.channel_name = ''
         config1.task_name = "GatedCounter"
         config1.timeout = self._RWTimeout
-        for i in range(n_iter):
-            counter1 = self.GatedCounter(config1)
-            counter1.start()
-            time.sleep(duration)
-            gated_count = counter1.get_gated_count()
-            counter1.stop()
-            print("{}\t{}".format(i, gated_count))
-            counts.append(gated_count)
+        try:
+            for i in range(n_iter):
+                counter1 = self.GatedCounter(config1)
+                #print(counter1)
+                counter1.start()
+                time.sleep(duration)
+                gated_count = counter1.get_gated_count()
+                counter1.stop()
+                print("{}\t{}".format(i, gated_count))
+                counts.append(gated_count)
+                counter1.clear()
+        except:
             counter1.clear()
+            raise
+
+
+    def test_2_gated_counters(self, duration=1., n_iter=10):
+        import time
+        counts1 = []
+        counts2 = []
+
+        config1 = self.GatedCounterConfig()
+        config1.counter_channel = '/Dev1/Ctr1'
+        config1.photon_source = '/Dev1/PFI1'
+        config1.gating_source = '/Dev1/PFI0'
+        config1.channel_name = ''
+        config1.task_name = "SignalCounter"
+        config1.timeout = self._RWTimeout
+
+        config2 = self.GatedCounterConfig()
+        config2.counter_channel = '/Dev1/Ctr2'
+        config2.photon_source = '/Dev1/PFI1'
+        config2.gating_source = '/Dev1/PFI2'
+        config2.channel_name = ''
+        config2.task_name = "ReferenceCounter"
+        config2.timeout = self._RWTimeout
+
+        try:
+            for i in range(n_iter):
+                counter1 = self.GatedCounter(config1)
+                #print(counter1)
+                counter2 = self.GatedCounter(config2)
+                #print(counter2)
+                print("starting counter 1.")
+                counter1.start()
+                print("starting counter 2.")
+                counter2.start()
+                print("waiting...")
+                time.sleep(duration)
+                gated_count1 = counter1.get_gated_count()
+                gated_count2 = counter2.get_gated_count()
+                counter1.stop()
+                counter2.stop()
+                print("signal\t{}\t{}".format(i, gated_count1))
+                print("reference\t{}\t{}".format(i, gated_count2))
+                counts1.append(gated_count1)
+                counts2.append(gated_count2)
+                counter1.clear()
+                counter2.clear()
+        except:
+            counter1.clear()
+            counter2.clear()
+            raise
 
     # -----------------------------------------------------------------------------------------
 
