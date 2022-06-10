@@ -2103,10 +2103,8 @@ class NationalInstrumentsXSeries(Base, SlowCounterInterface, ConfocalScannerInte
             raise
 
 
-    def test_2_gated_counters(self, duration=1., n_iter=10):
+    def test_2_gated_counters(self, duration1=0.01, duration2=1., steps=10, n_iter=30, debug=False):
         import time
-        counts1 = []
-        counts2 = []
 
         config1 = self.GatedCounterConfig()
         config1.counter_channel = '/Dev1/Ctr1'
@@ -2124,24 +2122,42 @@ class NationalInstrumentsXSeries(Base, SlowCounterInterface, ConfocalScannerInte
         config2.task_name = "ReferenceCounter"
         config2.timeout = self._RWTimeout
 
+        durations = np.linspace(duration1, duration2, steps, endpoint=True)
+        sleep_time = np.zeros([steps, n_iter])
+        measured_time = np.zeros([steps, n_iter])
+        counts1 = np.zeros([steps, n_iter])
+        counts2 = np.zeros([steps, n_iter])
         try:
-            for i in range(n_iter):
-                counter1 = self.GatedCounter(config1)
-                counter2 = self.GatedCounter(config2)
-                counter1.start()
-                counter2.start()
-                time.sleep(duration)
-                gated_count1 = counter1.get_gated_count()
-                gated_count2 = counter2.get_gated_count()
-                counter1.stop()
-                counter2.stop()
-                diff = gated_count1 - gated_count2
-                percent_diff = diff/gated_count1
-                print("{}\t{}\t{}\t{}\t{:.2%}".format(i, gated_count1, gated_count2, diff, percent_diff))
-                counts1.append(gated_count1)
-                counts2.append(gated_count2)
-                counter1.clear()
-                counter2.clear()
+            for i, duration in enumerate(durations):
+                self.log.info("i = {}".format(i))
+                for j in range(n_iter):
+                    time1 = time.perf_counter()
+                    counter1 = self.GatedCounter(config1)
+                    counter2 = self.GatedCounter(config2)
+                    counter1.start()
+                    counter2.start()
+                    time.sleep(duration)
+                    gated_count1 = counter1.get_gated_count()
+                    gated_count2 = counter2.get_gated_count()
+                    counter1.stop()
+                    counter2.stop()
+                    counter1.clear()
+                    counter2.clear()
+                    time2 = time.perf_counter()
+
+                    time_diff = time2 - time1
+                    sleep_time[i, j] = duration
+                    measured_time[i, j] = time_diff
+                    counts1[i,j] = gated_count1
+                    counts2[i,j] = gated_count2
+                    if debug:
+                        count_diff = gated_count1 - gated_count2
+                        percent_diff = count_diff/gated_count1
+                        print("{}\t{}\t{}\t{}\t{}\t{:.2%}".format(i, j, gated_count1, gated_count2, time_diff, percent_diff))
+                        time_overhead = time_diff - duration
+                        percent_overhead = time_overhead/duration
+                        print("{}\t{}\t{}\t{}\t{}\t{:.2%}".format(i, j, duration, time_diff, time_overhead, percent_overhead))
+
         except:
             try:
                 counter1.clear()
@@ -2152,7 +2168,10 @@ class NationalInstrumentsXSeries(Base, SlowCounterInterface, ConfocalScannerInte
             except UnboundLocalError:
                 pass
             raise
-
+        np.savetxt("measured_time.txt", measured_time)
+        np.savetxt("sleep_time.txt", sleep_time)
+        np.savetxt("counts1.txt", counts1)
+        np.savetxt("counts2.txt", counts2)
 
     def get_gated_counts(self, samples, timeout=None, read_available_samples=False):
         """ Returns latest count samples acquired by gated photon counting.
