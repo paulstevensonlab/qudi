@@ -2173,6 +2173,150 @@ class NationalInstrumentsXSeries(Base, SlowCounterInterface, ConfocalScannerInte
         np.savetxt("counts1.txt", counts1)
         np.savetxt("counts2.txt", counts2)
 
+    def test_gated_counter_timing(self, duration=0.1, n_iter=30, debug=False):
+        import time
+
+        config1 = self.GatedCounterConfig()
+        config1.counter_channel = '/Dev1/Ctr1'
+        config1.photon_source = '/Dev1/PFI1'
+        config1.gating_source = '/Dev1/PFI0'
+        config1.channel_name = ''
+        config1.task_name = "SignalCounter"
+        config1.timeout = self._RWTimeout
+
+        config2 = self.GatedCounterConfig()
+        config2.counter_channel = '/Dev1/Ctr0'
+        config2.photon_source = '/Dev1/PFI1'
+        config2.gating_source = '/Dev1/PFI2'
+        config2.channel_name = ''
+        config2.task_name = "ReferenceCounter"
+        config2.timeout = self._RWTimeout
+
+        init_times = []
+        start_times = []
+        sleep_times = []
+        get_gated_count_times = []
+        stop_times = []
+        clear_times = []
+
+        for i in range(n_iter):
+
+            time1 = time.perf_counter()
+            counter1 = self.GatedCounter(config1)
+            counter2 = self.GatedCounter(config2)
+            time2 = time.perf_counter()
+            counter1.start()
+            counter2.start()
+            time.sleep(duration)
+            gated_count1 = counter1.get_gated_count()
+            gated_count2 = counter2.get_gated_count()
+            counter1.stop()
+            counter2.stop()
+            counter1.clear()
+            counter2.clear()
+            time_diff = time2 - time1
+            init_times.append(time_diff)
+            if debug:
+                print("__init__() time: {}".format(time_diff))
+
+            counter1 = self.GatedCounter(config1)
+            counter2 = self.GatedCounter(config2)
+            time1 = time.perf_counter()
+            counter1.start()
+            counter2.start()
+            time2 = time.perf_counter()
+            time.sleep(duration)
+            gated_count1 = counter1.get_gated_count()
+            gated_count2 = counter2.get_gated_count()
+            counter1.stop()
+            counter2.stop()
+            counter1.clear()
+            counter2.clear()
+            time_diff = time2 - time1
+            start_times.append(time_diff)
+            if debug:
+                print("start() time: {}".format(time_diff))
+
+            counter1 = self.GatedCounter(config1)
+            counter2 = self.GatedCounter(config2)
+            counter1.start()
+            counter2.start()
+            time1 = time.perf_counter()
+            time.sleep(duration)
+            time2 = time.perf_counter()
+            gated_count1 = counter1.get_gated_count()
+            gated_count2 = counter2.get_gated_count()
+            counter1.stop()
+            counter2.stop()
+            counter1.clear()
+            counter2.clear()
+            time_diff = time2 - time1
+            sleep_times.append(time_diff)
+            if debug:
+                print("sleep() time: {}".format(time_diff))
+
+            counter1 = self.GatedCounter(config1)
+            counter2 = self.GatedCounter(config2)
+            counter1.start()
+            counter2.start()
+            time.sleep(duration)
+            time1 = time.perf_counter()
+            gated_count1 = counter1.get_gated_count()
+            gated_count2 = counter2.get_gated_count()
+            time2 = time.perf_counter()
+            counter1.stop()
+            counter2.stop()
+            counter1.clear()
+            counter2.clear()
+            time_diff = time2 - time1
+            get_gated_count_times.append(time_diff)
+            if debug:
+                print("get_gated_count() time: {}".format(time_diff))
+
+            counter1 = self.GatedCounter(config1)
+            counter2 = self.GatedCounter(config2)
+            counter1.start()
+            counter2.start()
+            time.sleep(duration)
+            gated_count1 = counter1.get_gated_count()
+            gated_count2 = counter2.get_gated_count()
+            time1 = time.perf_counter()
+            counter1.stop()
+            counter2.stop()
+            time2 = time.perf_counter()
+            counter1.clear()
+            counter2.clear()
+            time_diff = time2 - time1
+            stop_times.append(time_diff)
+            if debug:
+                print("stop() time: {}".format(time_diff))
+
+            counter1 = self.GatedCounter(config1)
+            counter2 = self.GatedCounter(config2)
+            counter1.start()
+            counter2.start()
+            time.sleep(duration)
+            gated_count1 = counter1.get_gated_count()
+            gated_count2 = counter2.get_gated_count()
+            counter1.stop()
+            counter2.stop()
+            time1 = time.perf_counter()
+            counter1.clear()
+            counter2.clear()
+            time2 = time.perf_counter()
+            time_diff = time2 - time1
+            clear_times.append(time_diff)
+            if debug:
+                print("clear() time: {}".format(time_diff))
+
+        np.savetxt("init_times.txt", init_times)
+        np.savetxt("start_times.txt", start_times)
+        np.savetxt("sleep_times.txt", sleep_times)
+        np.savetxt("get_gated_count_times.txt", get_gated_count_times)
+        np.savetxt("stop_times.txt", stop_times)
+        np.savetxt("clear_times.txt", clear_times)
+
+
     def get_gated_counts(self, samples, timeout=None, read_available_samples=False):
         """ Returns latest count samples acquired by gated photon counting.
 
