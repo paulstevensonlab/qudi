@@ -2025,7 +2025,7 @@ class NationalInstrumentsXSeries(Base, SlowCounterInterface, ConfocalScannerInte
             """
             daq.DAQmxSetDigLvlPauseTrigSrc(
                 self.task_handle,
-                self.gating_source # e.g. '/Dev/PFI0'
+                self.gating_source # e.g. '/Dev1/PFI0'
             )
             daq.DAQmxSetPauseTrigType(self.task_handle, daq.DAQmx_Val_DigLvl)
             daq.DAQmxSetDigLvlPauseTrigWhen(self.task_handle, daq.DAQmx_Val_Low)
