@@ -2408,3 +2408,10 @@ class NationalInstrumentsXSeries(Base, SlowCounterInterface, ConfocalScannerInte
             return 0
 
 
+    def get_system_device_names(self, n_bytes=2048):
+        buffer = daq.create_string_buffer(n_bytes)
+        daq.DAQmxGetSysDevNames(buffer, n_bytes)
+        device_list_bytes = buffer.value # e.g. b'Dev1, SimDev1'
+        device_list_str = device_list_bytes.decode('ascii')
+        device_list = device_list_str.split(',') # e.g. ['Dev1', 'SimDev1']
+        return device_list
