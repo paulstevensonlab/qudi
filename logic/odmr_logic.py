@@ -459,6 +459,7 @@ class ODMRLogic(GenericLogic):
 
         @return (float, float): actually set frequency in Hz, actually set power in dBm
         """
+        self.log.info("set_cw_parameters(): frequency = {} Hz, power = {} dBm".format(frequency, power))
         if self.module_state() != 'locked' and isinstance(frequency, (int, float)) and isinstance(power, (int, float)):
             constraints = self.get_hw_constraints()
             frequency_to_set = constraints.frequency_in_range(frequency)
@@ -468,7 +469,7 @@ class ODMRLogic(GenericLogic):
         else:
             self.log.warning('set_cw_frequency failed. Logic is either locked or input value is '
                              'no integer or float.')
-
+        self.log.info("set_cw_parameters(): self.cw_mw_frequency = {}, self.cw_mw_power = {}".format(self.cw_mw_frequency, self.cw_mw_power))
         param_dict = {'cw_mw_frequency': self.cw_mw_frequency, 'cw_mw_power': self.cw_mw_power}
         self.sigParameterUpdated.emit(param_dict)
         return self.cw_mw_frequency, self.cw_mw_power
