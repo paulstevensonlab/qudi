@@ -133,6 +133,7 @@ class PulsedMasterLogic(GenericLogic):
 
         self._initialize_pulsed_plots()
         self.pi2_pulse = np.round(self.pi_pulse / 2)
+        self.earlyStop = False
 
         return
 
@@ -295,6 +296,7 @@ class PulsedMasterLogic(GenericLogic):
 
             self.module_state.lock()
             self.stopRequested = False
+            self.earlyStop = False
             self.elapsed_sweeps = 0
             # Update these so the scan headers are more likely to be correct.
             self.uw_power = self.odmrlogic1().cw_mw_power
@@ -379,6 +381,7 @@ class PulsedMasterLogic(GenericLogic):
         with self.threadlock:
             if self.module_state() == 'locked':
                 self.stopRequested = True
+                self.earlyStop = True
         return 0
 
     def _scan_pulse_line(self):
@@ -474,10 +477,13 @@ class PulsedMasterLogic(GenericLogic):
             self.elapsed_sweeps += 1
             if (self.elapsed_sweeps) >= self.exptparams[4]:
                 self.stopRequested = True
+                self.earlyStop = False
 
 
 
             self.sigNextLinePulse.emit()
+        if self.stopRequested and not self.earlyStop:
+            self.log.exception("finished scan.")
         return
 
     ##################################################
