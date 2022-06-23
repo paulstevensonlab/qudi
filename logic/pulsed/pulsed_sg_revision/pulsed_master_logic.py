@@ -483,6 +483,7 @@ class PulsedMasterLogic(GenericLogic):
 
             self.sigNextLinePulse.emit()
         if self.stopRequested and not self.earlyStop:
+            # TODO: figure out how to make the GUI create a pop-up at this point rather than throwing an exception.
             self.log.exception("finished scan.")
         return
 
