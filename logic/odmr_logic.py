@@ -806,7 +806,7 @@ class ODMRLogic(GenericLogic):
                 self.module_state.unlock()
                 if self.optimiserlogic().module_state() == 'idle':
                     self.optimiserlogic().start_refocus(caller_tag='tracking')
-                    time.sleep(10)
+                    time.sleep(12)
                 self._start_odmr_counter()
                 self.module_state.lock()
 
