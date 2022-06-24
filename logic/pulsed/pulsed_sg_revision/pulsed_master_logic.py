@@ -405,7 +405,7 @@ class PulsedMasterLogic(GenericLogic):
                     self.module_state.unlock()
                     if self.optimiserlogic().module_state() == 'idle':
                         self.optimiserlogic().start_refocus(caller_tag='tracking')
-                        time.sleep(10) # note - we really should replace this with something which waits for the signal from the optimizer
+                        time.sleep(12) # note - we really should replace this with something which waits for the signal from the optimizer
                     self.module_state.lock()
                     #do some tracking
 
