@@ -384,6 +384,28 @@ class PulsedMasterLogic(GenericLogic):
                 self.earlyStop = True
         return 0
 
+    def get_sigref(self, from_counter, histogram):
+        if self.histogram:
+            if self.exptrunning == 'CW ODMR':
+                st_inds = [0, int(self.cwparams[5] * 1e9) - 1]
+                end_inds = [int(self.cwparams[5] * 1e9), int(2 * self.cwparams[5] * 1e9) - 1]
+            else:
+                st_inds = [100, int(100 + self.pulselengths[3])]
+                end_inds = [int(self.pulselengths[2] - self.pulselengths[3]), int(self.pulselengths[2])]
+            signal =    np.mean(fromcounter[0, st_inds[0]:st_inds[1]])
+            reference = np.mean(fromcounter[0, end_inds[0]:end_inds[1]])
+            sig_over_ref = signal/reference
+            pulsed_raw_data = [signal, reference, sig_over_ref]
+        else:
+            # TODO: add the logic for a non-histogram counter, e.g. the gated counter
+            # Maybe something like this:
+            # signal, reference = from_counter
+            # or
+            # signal, reference = from_counter.sigal, from_counter.reference
+            raise NotImplementedError
+
+        return pulsed_raw_data
+
     def _scan_pulse_line(self):
         with self.threadlock:
             if self.module_state() != 'locked':
@@ -411,13 +433,6 @@ class PulsedMasterLogic(GenericLogic):
 
                 #do some tracking
 
-            if self.exptrunning == 'CW ODMR':
-                st_inds = [0,int(self.cwparams[5]*1e9)-1]
-                end_inds = [int(self.cwparams[5]*1e9),int(2*self.cwparams[5]*1e9)-1]
-            else:
-                st_inds = [100,int(100+self.pulselengths[3])]
-                end_inds = [int(self.pulselengths[2]-self.pulselengths[3]),int(self.pulselengths[2])]
-
             # This needs a case for scanning frequency - mostly for pulsed ODMR
 
             # self.templist = np.zeros((int(self.totaltime+1),int(self.final_sweep_list.size)))
@@ -438,13 +453,7 @@ class PulsedMasterLogic(GenericLogic):
                     self.fromcounter = self.fastcounter().measure_for(self.exptparams[3])
                     # self.templist[:,k] = self.fromcounter
                     #
-                    self.pulsed_raw_data[0, k, self.elapsed_sweeps] = np.mean(
-                        self.fromcounter[0, st_inds[0]:st_inds[1]])
-                    self.pulsed_raw_data[1, k, self.elapsed_sweeps] = np.mean(
-                        self.fromcounter[0, end_inds[0]:end_inds[1]])
-                    self.pulsed_raw_data[2, k, self.elapsed_sweeps] = (
-                                np.mean(self.fromcounter[0, st_inds[0]:st_inds[1]]) /
-                                np.mean(self.fromcounter[0, end_inds[0]:end_inds[1]]))
+                    self.pulsed_raw_data[:, k, self.elapsed_sweeps] = get_sigref(self.from_counter, histogram=True)
                 # self.tt_output[self.elapsed_sweeps,:,:] = self.templist
 
             elif self.scanvar == 'Freq':
@@ -453,13 +462,7 @@ class PulsedMasterLogic(GenericLogic):
                     self.odmrlogic1()._mw_device.trigger()
                     self.fromcounter = self.fastcounter().measure_for(self.exptparams[3])
                     #
-                    self.pulsed_raw_data[0, k, self.elapsed_sweeps] = np.mean(
-                        self.fromcounter[0, st_inds[0]:st_inds[1]])
-                    self.pulsed_raw_data[1, k, self.elapsed_sweeps] = np.mean(
-                        self.fromcounter[0, end_inds[0]:end_inds[1]])
-                    self.pulsed_raw_data[2, k, self.elapsed_sweeps] = (
-                                np.mean(self.fromcounter[0, st_inds[0]:st_inds[1]]) /
-                                np.mean(self.fromcounter[0, end_inds[0]:end_inds[1]]))
+                    self.pulsed_raw_data[:, k, self.elapsed_sweeps] = get_sigref(self.from_counter, histogram=True)
                 self.odmrlogic1()._mw_device.trigger()
                 #
 
