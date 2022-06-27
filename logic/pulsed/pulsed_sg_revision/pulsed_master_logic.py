@@ -435,7 +435,6 @@ class PulsedMasterLogic(GenericLogic):
 
             # This needs a case for scanning frequency - mostly for pulsed ODMR
 
-            # self.templist = np.zeros((int(self.totaltime+1),int(self.final_sweep_list.size)))
 
             if self.scanvar == 'Time':
                 for k, tau in enumerate(self.final_sweep_list):
@@ -451,20 +450,15 @@ class PulsedMasterLogic(GenericLogic):
                     self.pulsegenerator().direct_write(self.sequence_dict)
                     self.pulsegenerator().pulser_on()
                     self.fromcounter = self.fastcounter().measure_for(self.exptparams[3])
-                    # self.templist[:,k] = self.fromcounter
-                    #
                     self.pulsed_raw_data[:, k, self.elapsed_sweeps] = get_sigref(self.from_counter, histogram=True)
-                # self.tt_output[self.elapsed_sweeps,:,:] = self.templist
 
             elif self.scanvar == 'Freq':
                 self.odmrlogic1()._mw_device.reset_sweeppos()
                 for k in range(int(self.final_sweep_list.shape[0])):
                     self.odmrlogic1()._mw_device.trigger()
                     self.fromcounter = self.fastcounter().measure_for(self.exptparams[3])
-                    #
                     self.pulsed_raw_data[:, k, self.elapsed_sweeps] = get_sigref(self.from_counter, histogram=True)
                 self.odmrlogic1()._mw_device.trigger()
-                #
 
             else:
                 print('Error: scanvar not correctly set')
