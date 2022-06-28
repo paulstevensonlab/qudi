@@ -73,8 +73,9 @@ class NI_X_FastCounter(Base, FastCounterInterface):
         config_reference.task_name = "ReferenceCounter"
         config_reference.timeout = self._timeout
 
-        self.counter_signal = NationalInstrumentsXSeries.GatedCounter(config_signal)
-        self.counter_reference = NationalInstrumentsXSeries.GatedCounter(config_reference)
+        self.signal_counter = NationalInstrumentsXSeries.GatedCounter(config_signal)
+        self.reference_counter = NationalInstrumentsXSeries.GatedCounter(config_reference)
+
 
     def get_status(self):
         raise NotImplementedError
@@ -84,22 +85,24 @@ class NI_X_FastCounter(Base, FastCounterInterface):
 
     def measure_for(self, duration):
         """ Duration is in seconds"""
-        self.counter_signal.start()
-        self.counter_reference.start()
+        # TODO: use a better method than time.sleep()
+
+        self.signal_counter.start()
+        self.reference_counter.start()
         time.sleep(duration)
-        signal = self.counter_signal.get_gated_count()
-        reference = self.counter_reference.get_gated_count()
-        self.counter_signal.stop()
-        self.counter_reference.stop()
-        self.counter_signal.clear()
-        self.counter_reference.clear()
+        signal = self.signal_counter.get_gated_count()
+        reference = self.reference_counter.get_gated_count()
+        self.signal_counter.stop()
+        self.reference_counter.stop()
+        self.signal_counter.clear()
+        self.reference_counter.clear()
         return signal, reference
 
     def stop_measure(self):
-        self.counter_signal.stop()
-        self.counter_reference.stop()
-        self.counter_signal.clear()
-        self.counter_reference.clear()
+        self.signal_counter.stop()
+        self.reference_counter.stop()
+        self.signal_counter.clear()
+        self.reference_counter.clear()
 
     def pause_measure(self):
         raise NotImplementedError
