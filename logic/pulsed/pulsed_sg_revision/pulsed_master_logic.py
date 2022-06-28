@@ -384,8 +384,8 @@ class PulsedMasterLogic(GenericLogic):
                 self.earlyStop = True
         return 0
 
-    def get_sigref(self, from_counter, histogram):
-        if self.histogram:
+    def get_sigref(self, fromcounter, histogram):
+        if histogram:
             if self.exptrunning == 'CW ODMR':
                 st_inds = [0, int(self.cwparams[5] * 1e9) - 1]
                 end_inds = [int(self.cwparams[5] * 1e9), int(2 * self.cwparams[5] * 1e9) - 1]
@@ -450,14 +450,14 @@ class PulsedMasterLogic(GenericLogic):
                     self.pulsegenerator().direct_write(self.sequence_dict)
                     self.pulsegenerator().pulser_on()
                     self.fromcounter = self.fastcounter().measure_for(self.exptparams[3])
-                    self.pulsed_raw_data[:, k, self.elapsed_sweeps] = get_sigref(self.from_counter, histogram=True)
+                    self.pulsed_raw_data[:, k, self.elapsed_sweeps] = self.get_sigref(self.fromcounter, histogram=True)
 
             elif self.scanvar == 'Freq':
                 self.odmrlogic1()._mw_device.reset_sweeppos()
                 for k in range(int(self.final_sweep_list.shape[0])):
                     self.odmrlogic1()._mw_device.trigger()
                     self.fromcounter = self.fastcounter().measure_for(self.exptparams[3])
-                    self.pulsed_raw_data[:, k, self.elapsed_sweeps] = get_sigref(self.from_counter, histogram=True)
+                    self.pulsed_raw_data[:, k, self.elapsed_sweeps] = self.get_sigref(self.fromcounter, histogram=True)
                 self.odmrlogic1()._mw_device.trigger()
 
             else:
