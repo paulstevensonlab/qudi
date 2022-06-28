@@ -54,8 +54,9 @@ class NI_X_FastCounter(Base, FastCounterInterface):
 
     def configure(self, bin_width_s, record_length_s, number_of_gates=2):
         # TODO: what should be done with bin_width_s and record_length_s?
+
         if number_of_gates != 2:
-            raise ValueError("number_of_gates != 2: {}".format(number_of_gates))
+            raise ValueError("number_of_gates must be 2, but got '{}'".format(number_of_gates))
 
         config_signal = NationalInstrumentsXSeries.GatedCounterConfig()
         config_signal.counter_channel = self._signal_counter_channel
