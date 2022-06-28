@@ -43,7 +43,7 @@ class SlowCounterInterface(metaclass=InterfaceMetaclass):
 
         @return (SlowCounterConstraints): object with constraints for the counter
 
-        The constrains are defined as a SlowCounterConstraints object, defined at  the end of this file
+        The constraints are defined as a SlowCounterConstraints object, defined at  the end of this file
         """
         pass
 

@@ -401,7 +401,7 @@ class PulsedMasterLogic(GenericLogic):
             # Maybe something like this:
             # signal, reference = from_counter
             # or
-            # signal, reference = from_counter.sigal, from_counter.reference
+            # signal, reference = from_counter.signal, from_counter.reference
             raise NotImplementedError
 
         return pulsed_raw_data
