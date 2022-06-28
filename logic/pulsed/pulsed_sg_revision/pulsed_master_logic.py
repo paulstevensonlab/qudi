@@ -397,12 +397,9 @@ class PulsedMasterLogic(GenericLogic):
             sig_over_ref = signal/reference
             pulsed_raw_data = [signal, reference, sig_over_ref]
         else:
-            # TODO: add the logic for a non-histogram counter, e.g. the gated counter
-            # Maybe something like this:
-            # signal, reference = from_counter
-            # or
-            # signal, reference = from_counter.signal, from_counter.reference
-            raise NotImplementedError
+            signal, reference = from_counter
+            sig_over_ref = signal / reference
+            pulsed_raw_data = [signal, reference, sig_over_ref]
 
         return pulsed_raw_data
 
