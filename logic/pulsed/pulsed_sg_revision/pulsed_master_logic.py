@@ -446,6 +446,8 @@ class PulsedMasterLogic(GenericLogic):
                         self.sequence_dict['Levels'] = self.t1_sequence(tau,self.final_sweep_list.max())
                     self.pulsegenerator().direct_write(self.sequence_dict)
                     self.pulsegenerator().pulser_on()
+                    # TODO: make the PulseStreamer output high when we want to measure signal
+                    # TODO: make the PulseStreamer output high when we want to measure reference
                     self.fromcounter = self.fastcounter().measure_for(self.exptparams[3])
                     self.pulsed_raw_data[:, k, self.elapsed_sweeps] = self.get_sigref(self.fromcounter, histogram=True)
 
@@ -453,6 +455,8 @@ class PulsedMasterLogic(GenericLogic):
                 self.odmrlogic1()._mw_device.reset_sweeppos()
                 for k in range(int(self.final_sweep_list.shape[0])):
                     self.odmrlogic1()._mw_device.trigger()
+                    # TODO: make the PulseStreamer output high when we want to measure signal
+                    # TODO: make the PulseStreamer output high when we want to measure reference
                     self.fromcounter = self.fastcounter().measure_for(self.exptparams[3])
                     self.pulsed_raw_data[:, k, self.elapsed_sweeps] = self.get_sigref(self.fromcounter, histogram=True)
                 self.odmrlogic1()._mw_device.trigger()
