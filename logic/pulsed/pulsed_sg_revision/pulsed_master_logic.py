@@ -65,6 +65,7 @@ class PulsedMasterLogic(GenericLogic):
     do_channel_states = StatusVar('DO channel states', [0,0,0,0,0,0,0,0])
     pulselengths = StatusVar('Pulse Timing Parameters',[700,10,3000,300]) # aom delay, microwave delay, aom pulse length, integration time, all in nanoseconds
     pulseconfigs = StatusVar('Pulse Channel Configuration',[0,2,1]) # channels for AOM, microwave switch, gate/sync
+    #pulseconfigs = StatusVar('Pulse Channel Configuration',[0,2,1,3,4]) # channels for AOM, microwave switch, gate/sync, signal gate, reference gate
     cwparams = StatusVar('CW ODMR params', [2.80e9,2.90e9,1.e6,0.1,1,100.e-6])  # start, stop, step, dwell per point, average, length of ref pulse
     rabiparams = StatusVar('Rabi params',[10., 1000., 10., 0.1, 1])  # start, stop, step, dwell per point, average
     ramseyparams = StatusVar('Ramsey params', [10., 1000., 10., 0.1, 1])  # start, stop, step, dwell per point, average
@@ -651,6 +652,8 @@ class PulsedMasterLogic(GenericLogic):
         sync_patt = [(100, 1), (int(totallength - 100), 0)]
         mw_patt = [(int(self.cwparams[5]*1e9),1),(int(self.cwparams[5]*1e9),0)]
         laser_patt = [(int(totallength-10),1),(int(10),0)]
+        signal_patt = mw_patt
+        ref_patt = [(int(self.cwparams[5]*1e9),0),(int(self.cwparams[5]*1e9),1)] # inverse of signal_patt
 
         laser_rle = self.traj_to_rle(np.roll(self.rle_to_traj(laser_patt), int(-1 * self.pulselengths[0])))
         mw_rle = self.traj_to_rle(np.roll(self.rle_to_traj(mw_patt), int(self.pulselengths[1])))

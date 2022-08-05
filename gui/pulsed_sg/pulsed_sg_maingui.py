@@ -965,7 +965,7 @@ class PulsedMeasurementGui(GUIBase):
         self.odmrparams[3] = self._st_expt.spinbox_odmr_dwell.value()
         self.odmrparams[4] = self._st_expt.spinbox_odmr_rep.value()
         self._pulsed_logic.set_odmr(self.odmrparams)
-        self.log.info("_update_odmrvals: self.cwparams[4] = {}".format(odmrparams[4]))
+        self.log.info("_update_odmrvals: self.cwparams[4] = {}".format(self.odmrparams[4]))
         return
 
     def _update_odmrbox(self):
