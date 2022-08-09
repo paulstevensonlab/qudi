@@ -33,6 +33,7 @@ class AutomationGui(GUIBase):
 
     # declare connectors
     automationlogic = Connector(interface='AutomationLogic')
+    # pulsedgui = Connector(interface='PulsedMeasurementGui')
 
     sigRunTaskFromList = QtCore.Signal(object)
     sigPauseTaskFromList = QtCore.Signal(object)

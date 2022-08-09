@@ -98,6 +98,7 @@ class PulsedMeasurementGui(GUIBase):
     sigPiPulseChanged = QtCore.Signal(float)
     sigExptChanged = QtCore.Signal(str)
     sigSaveChanged = QtCore.Signal(bool)
+    sigLogChanged = QtCore.Signal(bool)
     sigTrackChanged = QtCore.Signal(bool,int)
     sigNameChanged = QtCore.Signal(str)
     sigSaveMeasurement = QtCore.Signal(str, list, list)
@@ -182,6 +183,8 @@ class PulsedMeasurementGui(GUIBase):
                                           QtCore.Qt.QueuedConnection)
         self.sigSaveChanged.connect(self._pulsed_logic.set_autosave,
                                     QtCore.Qt.QueuedConnection)
+        self.sigLogChanged.connect(self._pulsed_logic.set_logscale,
+                                   QtCore.Qt.QueuedConnection)
         self.sigTrackChanged.connect(self._pulsed_logic.set_autotrack,
                                     QtCore.Qt.QueuedConnection)
 
@@ -195,6 +198,7 @@ class PulsedMeasurementGui(GUIBase):
 
         self._st_expt.combo_exptchoice.currentIndexChanged.connect(self.change_exptchoice)
         self._mw.autosave_checkBox.stateChanged.connect(self.change_autosave)
+        self._st_expt.LogScale_checkBox.stateChanged.connect(self.change_logscale)
         self._mw.autotrack_checkBox.stateChanged.connect(self.change_autotrack)
         self._mw.autotrack_spinBox.valueChanged.connect(self.change_autotrack)
 
@@ -216,6 +220,9 @@ class PulsedMeasurementGui(GUIBase):
 
         self.autosave = self._pulsed_logic.autosave
         self._update_save()
+
+        self.logscale = self._pulsed_logic.logscale
+        self._update_logscale()
 
         self.autotrack = self._pulsed_logic._autotrack
         self.trackevery = self._pulsed_logic._trackevery
@@ -485,7 +492,8 @@ class PulsedMeasurementGui(GUIBase):
             self._st_expt.spinbox_t1_step.setEnabled(False)
             self._st_expt.spinbox_t1_dwell.setEnabled(False)
             self._st_expt.spinbox_t1_rep.setEnabled(False)
-
+            ## Misc
+            self._st_expt.LogScale_checkBox.setEnabled(False)
             ## CW ODMR ##
             self._cwodmr.spinbox_odmr_start.setEnabled(False)
             self._cwodmr.spinbox_odmr_stop.setEnabled(False)
@@ -648,6 +656,8 @@ class PulsedMeasurementGui(GUIBase):
             self._st_expt.spinbox_t1_dwell.setEnabled(True)
             self._st_expt.spinbox_t1_step.setEnabled(True)
             self._st_expt.spinbox_t1_rep.setEnabled(True)
+            ## Misc ##
+            self._st_expt.LogScale_checkBox.setEnabled(True)
             ## CW ODMR ##
             self._cwodmr.spinbox_odmr_start.setEnabled(True)
             self._cwodmr.spinbox_odmr_stop.setEnabled(True)
@@ -719,6 +729,11 @@ class PulsedMeasurementGui(GUIBase):
         self.sigSaveChanged.emit(self.autosave)
         return
 
+    def change_logscale(self):
+        self.logscale = self._st_expt.LogScale_checkBox.isChecked()
+        self.sigLogChanged.emit(self.logscale)
+        return
+
     def change_tab(self):
         self.tabstate = self._mw.tabWidget.currentIndex()
         if self.tabstate == 1:
@@ -784,6 +799,10 @@ class PulsedMeasurementGui(GUIBase):
 
     def _update_save(self):
         self._mw.autosave_checkBox.setChecked(self.autosave)
+        return
+
+    def _update_logscale(self):
+        self._st_expt.LogScale_checkBox.setChecked(self.logscale)
         return
 
     def _update_track(self):

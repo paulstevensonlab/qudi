@@ -378,36 +378,47 @@
      </property>
      <layout class="QHBoxLayout" name="horizontalLayout_2">
       <item>
-       <widget class="QComboBox" name="combo_exptchoice">
-        <property name="enabled">
-         <bool>true</bool>
-        </property>
+       <layout class="QVBoxLayout" name="verticalLayout">
         <item>
-         <property name="text">
-          <string>Rabi</string>
-         </property>
+         <widget class="QComboBox" name="combo_exptchoice">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
+          <item>
+           <property name="text">
+            <string>Rabi</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Pulsed ODMR</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Ramsey</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Hahn Echo</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>T1</string>
+           </property>
+          </item>
+         </widget>
         </item>
         <item>
-         <property name="text">
-          <string>Pulsed ODMR</string>
-         </property>
+         <widget class="QCheckBox" name="LogScale_checkBox">
+          <property name="text">
+           <string>Log Time Spacing? (Note - Step size will become number of steps)</string>
+          </property>
+         </widget>
         </item>
-        <item>
-         <property name="text">
-          <string>Ramsey</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Hahn Echo</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>T1</string>
-         </property>
-        </item>
-       </widget>
+       </layout>
       </item>
      </layout>
     </widget>
@@ -562,7 +573,7 @@
         <item row="0" column="2">
          <widget class="QLabel" name="label_28">
           <property name="text">
-           <string> </string>
+           <string/>
           </property>
          </widget>
         </item>

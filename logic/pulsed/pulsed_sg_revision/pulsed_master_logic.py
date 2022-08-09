@@ -77,6 +77,7 @@ class PulsedMasterLogic(GenericLogic):
     autosave = StatusVar('Pulsed Autosave',False)
     _autotrack = StatusVar('autotrack', default=True)
     _trackevery = StatusVar('trackevery',default=3)
+    logscale = StatusVar('Log Step',default=False)
 
     # Define signals
     sigParameterUpdated = QtCore.Signal(dict)
@@ -211,6 +212,10 @@ class PulsedMasterLogic(GenericLogic):
 
     def set_autosave(self,saveon):
         self.autosave = saveon
+        return
+
+    def set_logscale(self,logscale):
+        self.logscale = logscale
         return
 
     def set_autotrack(self,trackon,tracknumber):
@@ -540,6 +545,10 @@ class PulsedMasterLogic(GenericLogic):
     def _setup_hahn(self):
         self.final_sweep_list = np.arange(self.exptparams[0], self.exptparams[1] + self.exptparams[2],
                                           self.exptparams[2])
+        if self.logscale:
+            print('Using Log Scale')
+            self.final_sweep_list = np.logspace(np.log10(self.exptparams[0]), np.log10(self.exptparams[1]),
+                                                self.exptparams[2])
 
         self.sequence_dict['Channels'] = self.pulseconfigs
         self.sequence_dict['Levels'] = self.hahn_sequence(10., self.final_sweep_list.max())
@@ -666,6 +675,10 @@ class PulsedMasterLogic(GenericLogic):
     def _initialize_pulsed_plots(self):
         self.final_sweep_list = np.arange(self.exptparams[0], self.exptparams[1] + self.exptparams[2],
                                           self.exptparams[2])
+        if self.logscale:
+            print('Using Log Scale')
+            self.final_sweep_list = np.logspace(np.log10(self.exptparams[0]), np.log10(self.exptparams[1]),
+                                                self.exptparams[2])
         self.number_of_lines = int(self.exptparams[4])
 
         self.pulsed_plot_x = np.array(self.final_sweep_list)
