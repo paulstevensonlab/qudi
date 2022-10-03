@@ -108,6 +108,7 @@ class PulsedMasterLogic(GenericLogic):
 
         self._save_logic = self.savelogic()
 
+
         # check status of connected instruments
         self.sigNextLinePulse.connect(self._scan_pulse_line, QtCore.Qt.QueuedConnection)
         self.uw_frequency = self.odmrlogic1().cw_mw_frequency
@@ -121,6 +122,7 @@ class PulsedMasterLogic(GenericLogic):
         self.number_of_lines = self.rabiparams[4]
         self.iscw = False # TODO: remove this unused function
         self.fname = ''
+        self.debug = 0
 
         if self.expt_current == 'Rabi':
             self.exptparams = self.rabiparams
@@ -128,8 +130,10 @@ class PulsedMasterLogic(GenericLogic):
             self.exptparams = self.ramseyparams
         elif self.expt_current == 'T1':
             self.exptparams = self.t1params
-        elif self.expt_current == 'T1':
+        elif self.expt_current == 'Hahn Echo':
             self.exptparams = self.hahnparams
+        elif self.expt_current == 'Pulsed ODMR':
+            self.exptparams = self.odmrparams
         else: ## NOTE - this needs to be updated later to account for more event cases
             self.exptparams = self.rabiparams
 
@@ -293,7 +297,61 @@ class PulsedMasterLogic(GenericLogic):
         self.sigParameterUpdated.emit(update_dict)
         return
 
+    def run_scan_auto(self,expttype,exptparams,otherparams):
+        # this is a function which can be called by other modules to enable automation of routine scan types
+        self.set_expt(expttype)
+        flag_remote = self.set_remoteparams(exptparams)
+        self.read_remote_otherparams(otherparams)
+        if flag_remote:
+            self.start_pulsed_scan()
+        else:
+            print('Error in setting parameters, will not try to run this step')
+        print('I have finished the scan!')
+        return -1
+
+    def set_remoteparams(self,paramstoset):
+        flag = True
+        if self.expt_current == 'Rabi':
+            self.rabiparams = paramstoset
+        elif self.expt_current == 'Ramsey':
+            self.ramseyparams = paramstoset
+        elif self.expt_current == 'T1':
+            self.t1params = paramstoset
+        elif self.expt_current == 'Hahn Echo':
+            self.hahnparams = paramstoset
+        elif self.expt_current == 'Pulsed ODMR':
+            self.odmrparams = paramstoset
+        elif self.expt_current == 'CW ODMR':
+            self.cwparams = paramstoset
+        else:  ## NOTE - this needs to be updated later to account for more event cases
+            flag = False
+        return flag
+
+    def read_remote_otherparams(self,param_dict):
+        param = param_dict.get('mw_frequency')
+        if param is not None:
+            mw_freq = param
+        else:
+            mw_freq = self.odmrlogic1().cw_mw_frequency
+
+        param = param_dict.get('mw_power')
+        if param is not None:
+            mw_power = param
+        else:
+            mw_power = self.odmrlogic1().cw_mw_power
+
+        self.odmrlogic1().set_cw_parameters(mw_freq,mw_power)
+
+        param = param_dict.get('log_spacing')
+        if param is not None:
+            self.logscale = param
+
+        return
+
     def start_pulsed_scan(self):
+
+        self.timestarted = datetime.datetime.now()
+        self.deadtime = 150
 
         with self.threadlock:
             if self.module_state() == 'locked':
@@ -398,8 +456,16 @@ class PulsedMasterLogic(GenericLogic):
             else:
                 st_inds = [100, int(100 + self.pulselengths[3])]
                 end_inds = [int(self.pulselengths[2] - self.pulselengths[3]), int(self.pulselengths[2])]
-            signal =    np.mean(fromcounter[0, st_inds[0]:st_inds[1]])
-            reference = np.mean(fromcounter[0, end_inds[0]:end_inds[1]])
+            sig_temp = np.array(fromcounter[0, st_inds[0]:st_inds[1]],dtype=float)
+            sig_temp[sig_temp==0] = np.nan
+            sig_temp[sig_temp == np.inf] = np.nan
+            signal = np.nanmean(sig_temp)
+            ref_temp = np.array(fromcounter[0, end_inds[0]:end_inds[1]],dtype=float)
+            ref_temp[ref_temp == 0] = np.nan
+            ref_temp[ref_temp == np.inf] = np.nan
+            reference = np.nanmean(ref_temp)
+            # signal =    np.mean(fromcounter[0, st_inds[0]:st_inds[1]])
+            # reference = np.mean(fromcounter[0, end_inds[0]:end_inds[1]])
             sig_over_ref = signal/reference
             pulsed_raw_data = [signal, reference, sig_over_ref]
         else:
@@ -455,6 +521,14 @@ class PulsedMasterLogic(GenericLogic):
                     # TODO: make the PulseStreamer output high when we want to measure signal
                     # TODO: make the PulseStreamer output high when we want to measure reference
                     self.fromcounter = self.fastcounter().measure_for(self.exptparams[3])
+                    ## This is temporarily hardcoded for debugging
+                    fname = r'C:\Users\NV Confocal\Documents\Data\Qudi\debugging\debug_dump.txt'
+                    if self.debug == 1:
+                        try:
+                            with open(fname, 'a') as dumpfile:
+                                np.savetxt(dumpfile,self.fromcounter)
+                        except:
+                            print('Missed writing one!')
                     self.pulsed_raw_data[:, k, self.elapsed_sweeps] = self.get_sigref(self.fromcounter, histogram=True)
 
             elif self.scanvar == 'Freq':
@@ -479,6 +553,10 @@ class PulsedMasterLogic(GenericLogic):
                                                 self.pulsed_raw_data)
 
             self.elapsed_sweeps += 1
+            if np.mod(self.elapsed_sweeps,10)==0:
+                if self.autosave:
+                    self.save_pulsed_data(tag=self.fname,timestamp=self.timestarted)
+
             if (self.elapsed_sweeps) >= self.exptparams[4]:
                 self.stopRequested = True
                 self.earlyStop = False
@@ -526,7 +604,8 @@ class PulsedMasterLogic(GenericLogic):
         self.pulsegenerator().pulser_on()
 
         self.totaltime = self.pulselengths[2] + self.final_sweep_list.max() + 50
-        self.fastcounter().configure(1.e-9,1e-9*self.totaltime,1)
+        # self.fastcounter().configure(1.e-9,1e-9*self.totaltime,1)
+        self.fastcounter().configure(1.e-9,1.e-9*(self.pulselengths[2]+self.deadtime),1)
         return 0
 
     def _setup_ramsey(self):
@@ -556,7 +635,8 @@ class PulsedMasterLogic(GenericLogic):
         self.pulsegenerator().pulser_on()
 
         self.totaltime = self.pulselengths[2] + 2*self.final_sweep_list.max() + 2*self.pi2_pulse  + self.pi_pulse + 50
-        self.fastcounter().configure(1.e-9, 1e-9 * self.totaltime, 1)
+        # self.fastcounter().configure(1.e-9, 1e-9 * self.totaltime, 1)
+        self.fastcounter().configure(1.e-9, 1.e-9 * (self.pulselengths[2] + self.deadtime), 1)
         return 0
 
     def _setup_t1(self):
@@ -593,10 +673,10 @@ class PulsedMasterLogic(GenericLogic):
     ### Sequence definitions
 
     def rabi_sequence(self,tau=100,taumax=2000):
-        totallength = self.pulselengths[2] + taumax + 100
+        totallength = self.pulselengths[2] + tau + 2*self.deadtime
         sync_patt = [(100,1),(int(totallength-100),0)]
-        mw_patt = [(int(self.pulselengths[2]+50),0),(int(tau),1),(int(totallength-self.pulselengths[2]-tau),0)]
-        laser_patt = [(self.pulselengths[2], 1), (int(totallength - self.pulselengths[2] + 50), 0)]
+        mw_patt = [(int(self.pulselengths[2]+self.deadtime),0),(int(tau),1),(int(self.deadtime),0)]
+        laser_patt = [(self.pulselengths[2], 1), (int(totallength - self.pulselengths[2]), 0)]
 
         laser_rle = self.traj_to_rle(np.roll(self.rle_to_traj(laser_patt), int(-1*self.pulselengths[0])))
         mw_rle = self.traj_to_rle(np.roll(self.rle_to_traj(mw_patt),int(self.pulselengths[1])))
@@ -605,12 +685,11 @@ class PulsedMasterLogic(GenericLogic):
         return [laser_rle,mw_rle,sync_rle]
 
     def ramsey_sequence(self,tau=100,taumax=2000):
-        totallength = self.pulselengths[2] + taumax + 2*self.pi2_pulse + 100
+        totallength = self.pulselengths[2] + tau + 2*self.deadtime + 2*self.pi2_pulse
         sync_patt = [(100, 1), (int(totallength - 100), 0)]
-        mw_patt = [(int(self.pulselengths[2] + 50), 0), (int(self.pi2_pulse), 1), (int(tau), 0),
-                   (int(self.pi2_pulse), 1),
-                   (int(totallength - self.pulselengths[2] - 2 * self.pi2_pulse - tau), 0)]
-        laser_patt = [(self.pulselengths[2], 1), (int(totallength - self.pulselengths[2] + 50), 0)]
+        mw_patt = [(int(self.pulselengths[2] + self.deadtime), 0), (int(self.pi2_pulse), 1), (int(tau), 0),
+                   (int(self.pi2_pulse), 1),(int(self.deadtime),0)]
+        laser_patt = [(self.pulselengths[2], 1), (int(totallength - self.pulselengths[2]), 0)]
 
         laser_rle = self.traj_to_rle(np.roll(self.rle_to_traj(laser_patt), int(-1 * self.pulselengths[0])))
         mw_rle = self.traj_to_rle(np.roll(self.rle_to_traj(mw_patt), int(self.pulselengths[1])))
@@ -619,12 +698,11 @@ class PulsedMasterLogic(GenericLogic):
         return [laser_rle, mw_rle, sync_rle]
 
     def hahn_sequence(self,tau=100,taumax=2000):
-        totallength = self.pulselengths[2] + 2*taumax + 2*self.pi2_pulse  + self.pi_pulse + 100
+        totallength = self.pulselengths[2] + 2*tau + 2*self.pi2_pulse  + self.pi_pulse + 2*self.deadtime
         sync_patt = [(100, 1), (int(totallength - 100), 0)]
-        mw_patt = [(int(self.pulselengths[2] + 50), 0), (int(self.pi2_pulse), 1), (int(tau), 0), (int(self.pi_pulse),1), (int(tau),0),
-                   (int(self.pi2_pulse), 1),
-                   (int(totallength - self.pulselengths[2] - 2 * self.pi2_pulse - 2*tau - self.pi_pulse), 0)]
-        laser_patt = [(self.pulselengths[2], 1), (int(totallength - self.pulselengths[2]+100), 0)]
+        mw_patt = [(int(self.pulselengths[2] + self.deadtime), 0), (int(self.pi2_pulse), 1), (int(tau), 0), (int(self.pi_pulse),1), (int(tau),0),
+                   (int(self.pi2_pulse), 1),(int(self.deadtime),0)]
+        laser_patt = [(self.pulselengths[2], 1), (int(totallength - self.pulselengths[2]), 0)]
 
         laser_rle = self.traj_to_rle(np.roll(self.rle_to_traj(laser_patt), int(-1 * self.pulselengths[0])))
         mw_rle = self.traj_to_rle(np.roll(self.rle_to_traj(mw_patt), int(self.pulselengths[1])))
@@ -635,7 +713,7 @@ class PulsedMasterLogic(GenericLogic):
     def t1_sequence(self,tau=100,taumax=2000):
         totallength = self.pulselengths[2] + tau
         sync_patt = [(100, 1), (int(totallength - 100), 0)]
-        mw_patt = [(10, 1), (int(totallength - 10), 0)]
+        mw_patt = [(5, 1), (int(totallength - 5), 0)]
         laser_patt = [(self.pulselengths[2], 1), (int(tau), 0)]
 
         laser_rle = self.traj_to_rle(np.roll(self.rle_to_traj(laser_patt), int(-1 * self.pulselengths[0])))
@@ -645,10 +723,10 @@ class PulsedMasterLogic(GenericLogic):
         return [laser_rle, mw_rle, sync_rle]
 
     def odmr_sequence(self):
-        totallength = self.pulselengths[2] + self.pi_pulse + 100.
+        totallength = self.pulselengths[2] + self.pi_pulse + 2*self.deadtime
         sync_patt = [(100, 1), (int(totallength - 100), 0)]
-        mw_patt = [(int(self.pulselengths[2] + 50), 0), (int(self.pi_pulse), 1)]
-        laser_patt = [(self.pulselengths[2], 1), (int(totallength - self.pulselengths[2]+100), 0)]
+        mw_patt = [(int(self.pulselengths[2] + self.deadtime), 0), (int(self.pi_pulse), 1),(int(self.deadtime),0)]
+        laser_patt = [(self.pulselengths[2], 1), (int(totallength - self.pulselengths[2]), 0)]
 
         laser_rle = self.traj_to_rle(np.roll(self.rle_to_traj(laser_patt), int(-1 * self.pulselengths[0])))
         mw_rle = self.traj_to_rle(np.roll(self.rle_to_traj(mw_patt), int(self.pulselengths[1])))
@@ -729,8 +807,9 @@ class PulsedMasterLogic(GenericLogic):
         patt.append((int(totaltime - stepinds[-1] - 1), traj[-1]))
         return patt
 
-    def save_pulsed_data(self, tag=None, colorscale_range=None, percentile_range=None):
-        timestamp = datetime.datetime.now()
+    def save_pulsed_data(self, tag=None, colorscale_range=None, percentile_range=None,timestamp=''):
+        if timestamp=='':
+            timestamp = datetime.datetime.now()
         filepath = self._save_logic.get_path_for_module(module_name='Pulsed')
 
         if tag is None:
