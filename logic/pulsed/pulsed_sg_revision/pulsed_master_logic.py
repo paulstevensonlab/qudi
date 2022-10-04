@@ -484,7 +484,7 @@ class PulsedMasterLogic(GenericLogic):
                 self.stopRequested = False
                 self.mw_off()
                 if self.autosave:
-                    self.save_pulsed_data(tag=self.fname)
+                    self.save_pulsed_data(tag=self.fname, timestamp=self.timestarted)
                 self.sigExptRunningUpdated.emit(False)
                 self.module_state.unlock()
                 return
