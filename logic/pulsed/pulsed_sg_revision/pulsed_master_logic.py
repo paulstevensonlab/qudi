@@ -554,8 +554,9 @@ class PulsedMasterLogic(GenericLogic):
 
             self.elapsed_sweeps += 1
             if np.mod(self.elapsed_sweeps,10)==0:
+                # Save every 10 scans in case of interruption.
                 if self.autosave:
-                    self.save_pulsed_data(tag=self.fname,timestamp=self.timestarted)
+                    self.save_pulsed_data(tag=self.fname, timestamp=self.timestarted)
 
             if (self.elapsed_sweeps) >= self.exptparams[4]:
                 self.stopRequested = True
