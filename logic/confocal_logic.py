@@ -929,15 +929,8 @@ class ConfocalLogic(GenericLogic):
         axes = ['X', 'Y']
         crosshair_pos = [self.get_position()[0], self.get_position()[1]]
 
-        figs = {ch: self.draw_figure(data=self.xy_image[:, :, 3 + n],
-                                     image_extent=image_extent,
-                                     scan_axis=axes,
-                                     cbar_range=colorscale_range,
-                                     percentile_range=percentile_range,
-                                     crosshair_pos=crosshair_pos)
-                for n, ch in enumerate(self.get_scanner_count_channels())}
-
         # Save the image data and figure
+        figs = {}
         for n, ch in enumerate(self.get_scanner_count_channels()):
             # data for the text-array "image":
             image_data = OrderedDict()
@@ -947,6 +940,17 @@ class ConfocalLogic(GenericLogic):
                 'of entries where the Signal is in counts/s:'] = self.xy_image[:, :, 3 + n]
 
             filelabel = 'confocal_xy_image_{0}'.format(ch.replace('/', ''))
+            fig_title = timestamp.strftime('%Y%m%d-%H%M-%S') + '_' + filelabel
+            plotfig = self.draw_figure(
+                data=self.xy_image[:, :, 3 + n],
+                image_extent=image_extent,
+                scan_axis=axes,
+                cbar_range=colorscale_range,
+                percentile_range=percentile_range,
+                crosshair_pos=crosshair_pos,
+                title=fig_title
+            )
+            figs[ch] = plotfig
             self._save_logic.save_data(image_data,
                                        filepath=filepath,
                                        timestamp=timestamp,
@@ -954,7 +958,7 @@ class ConfocalLogic(GenericLogic):
                                        filelabel=filelabel,
                                        fmt='%.6e',
                                        delimiter='\t',
-                                       plotfig=figs[ch])
+                                       plotfig=plotfig)
 
         # prepare the full raw data in an OrderedDict:
         data = OrderedDict()
@@ -1088,7 +1092,7 @@ class ConfocalLogic(GenericLogic):
         self.signal_depth_data_saved.emit()
         return
 
-    def draw_figure(self, data, image_extent, scan_axis=None, cbar_range=None, percentile_range=None,  crosshair_pos=None):
+    def draw_figure(self, data, image_extent, scan_axis=None, cbar_range=None, percentile_range=None,  crosshair_pos=None, title=None):
         """ Create a 2-D color map figure of the scan image.
 
         @param: array data: The NxM array of count values from a scan with NxM pixels.
@@ -1103,6 +1107,8 @@ class ConfocalLogic(GenericLogic):
         @param: list percentile_range: (optional) Percentile range of the chosen cbar_range.
 
         @param: list crosshair_pos: (optional) crosshair position as [hor, vert] in the chosen image axes.
+
+        @param: string title: (optional) title of the figure
 
         @return: fig fig: a matplotlib figure object to be saved to file.
         """
@@ -1165,6 +1171,8 @@ class ConfocalLogic(GenericLogic):
         ax.set_aspect(1)
         ax.set_xlabel(scan_axis[0] + ' position (' + x_prefix + 'm)')
         ax.set_ylabel(scan_axis[1] + ' position (' + y_prefix + 'm)')
+        if title is not None:
+            ax.set_title(title)
         ax.spines['bottom'].set_position(('outward', 10))
         ax.spines['left'].set_position(('outward', 10))
         ax.spines['top'].set_visible(False)
