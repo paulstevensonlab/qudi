@@ -464,11 +464,17 @@ class PulsedMasterLogic(GenericLogic):
             reference = np.mean(ref_temp)
             # signal =    np.mean(fromcounter[0, st_inds[0]:st_inds[1]])
             # reference = np.mean(fromcounter[0, end_inds[0]:end_inds[1]])
-            sig_over_ref = signal/reference
+            try:
+                sig_over_ref = signal/reference
+            except ZeroDivisionError:
+                sig_over_ref = np.nan
             pulsed_raw_data = [signal, reference, sig_over_ref]
         else:
             signal, reference = fromcounter
-            sig_over_ref = signal / reference
+            try:
+                sig_over_ref = signal / reference
+            except ZeroDivisionError:
+                sig_over_ref = np.nan
             pulsed_raw_data = [signal, reference, sig_over_ref]
 
         return pulsed_raw_data
