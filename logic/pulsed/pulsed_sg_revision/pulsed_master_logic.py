@@ -469,7 +469,7 @@ class PulsedMasterLogic(GenericLogic):
             sig_over_ref = signal/reference
             pulsed_raw_data = [signal, reference, sig_over_ref]
         else:
-            signal, reference = from_counter
+            signal, reference = fromcounter
             sig_over_ref = signal / reference
             pulsed_raw_data = [signal, reference, sig_over_ref]
 
