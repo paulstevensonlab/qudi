@@ -457,13 +457,11 @@ class PulsedMasterLogic(GenericLogic):
                 st_inds = [100, int(100 + self.pulselengths[3])]
                 end_inds = [int(self.pulselengths[2] - self.pulselengths[3]), int(self.pulselengths[2])]
             sig_temp = np.array(fromcounter[0, st_inds[0]:st_inds[1]],dtype=float)
-            sig_temp[sig_temp==0] = np.nan
             sig_temp[sig_temp == np.inf] = np.nan
-            signal = np.nanmean(sig_temp)
+            signal = np.mean(sig_temp)
             ref_temp = np.array(fromcounter[0, end_inds[0]:end_inds[1]],dtype=float)
-            ref_temp[ref_temp == 0] = np.nan
             ref_temp[ref_temp == np.inf] = np.nan
-            reference = np.nanmean(ref_temp)
+            reference = np.mean(ref_temp)
             # signal =    np.mean(fromcounter[0, st_inds[0]:st_inds[1]])
             # reference = np.mean(fromcounter[0, end_inds[0]:end_inds[1]])
             sig_over_ref = signal/reference
