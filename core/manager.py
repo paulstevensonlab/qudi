@@ -216,7 +216,7 @@ class Manager(QtCore.QObject):
     def _getConfigFile(self):
         """ Search all the default locations to find a configuration file.
 
-          @return sting: path to configuration file
+          @return string: path to configuration file
         """
         path = self.getMainDir()
         # we first look for config/load.cfg which can point to another
