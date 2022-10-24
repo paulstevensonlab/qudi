@@ -123,6 +123,7 @@ class PulsedMasterLogic(GenericLogic):
         self.iscw = False # TODO: remove this unused function
         self.fname = ''
         self.debug = 0
+        self.debug_line_duration = 0
 
         if self.expt_current == 'Rabi':
             self.exptparams = self.rabiparams
@@ -480,6 +481,13 @@ class PulsedMasterLogic(GenericLogic):
         return pulsed_raw_data
 
     def _scan_pulse_line(self):
+        if self.debug_line_duration == 1:
+            print("line duration debugging enabled")
+            debug_line_duration = True # flip this here and use it only to avoid UnboundLocalError
+            t_start_line = time.perf_counter()
+        else:
+            debug_line_duration = False
+
         with self.threadlock:
             if self.module_state() != 'locked':
                 return
@@ -506,10 +514,14 @@ class PulsedMasterLogic(GenericLogic):
 
                 #do some tracking
 
+            if debug_line_duration:
+                t_after_tracking = time.perf_counter()
             # This needs a case for scanning frequency - mostly for pulsed ODMR
-
-
             if self.scanvar == 'Time':
+                if debug_line_duration:
+                    t_start_fastcounter = np.zeros(len(self.final_sweep_list))
+                    t_end_fastcounter = np.zeros(len(self.final_sweep_list))
+                    dt_fastcounter_nominal = self.exptparams[3] * len(self.final_sweep_list)
                 for k, tau in enumerate(self.final_sweep_list):
                     self.sequence_dict['Channels'] = self.pulseconfigs
                     if self.exptrunning == 'Rabi':
@@ -524,7 +536,11 @@ class PulsedMasterLogic(GenericLogic):
                     self.pulsegenerator().pulser_on()
                     # TODO: make the PulseStreamer output high when we want to measure signal
                     # TODO: make the PulseStreamer output high when we want to measure reference
+                    if debug_line_duration:
+                        t_start_fastcounter[k] = time.perf_counter()
                     self.fromcounter = self.fastcounter().measure_for(self.exptparams[3])
+                    if debug_line_duration:
+                        t_end_fastcounter[k] = time.perf_counter()
                     ## This is temporarily hardcoded for debugging
                     fname = r'C:\Users\NV Confocal\Documents\Data\Qudi\debugging\debug_dump.txt'
                     if self.debug == 1:
@@ -536,12 +552,20 @@ class PulsedMasterLogic(GenericLogic):
                     self.pulsed_raw_data[:, k, self.elapsed_sweeps] = self.get_sigref(self.fromcounter, histogram=True)
 
             elif self.scanvar == 'Freq':
+                if debug_line_duration:
+                    t_start_fastcounter = np.zeros(int(self.final_sweep_list.shape[0]))
+                    t_end_fastcounter = np.zeros(int(self.final_sweep_list.shape[0]))
+                    dt_fastcounter_nominal = self.exptparams[3]*int(self.final_sweep_list.shape[0])
                 self.odmrlogic1()._mw_device.reset_sweeppos()
                 for k in range(int(self.final_sweep_list.shape[0])):
                     self.odmrlogic1()._mw_device.trigger()
                     # TODO: make the PulseStreamer output high when we want to measure signal
                     # TODO: make the PulseStreamer output high when we want to measure reference
+                    if debug_line_duration:
+                        t_start_fastcounter[k] = time.perf_counter()
                     self.fromcounter = self.fastcounter().measure_for(self.exptparams[3])
+                    if debug_line_duration:
+                        t_end_fastcounter[k] = time.perf_counter()
                     self.pulsed_raw_data[:, k, self.elapsed_sweeps] = self.get_sigref(self.fromcounter, histogram=True)
                 self.odmrlogic1()._mw_device.trigger()
 
@@ -566,12 +590,26 @@ class PulsedMasterLogic(GenericLogic):
                 self.stopRequested = True
                 self.earlyStop = False
 
-
-
             self.sigNextLinePulse.emit()
         if self.stopRequested and not self.earlyStop:
             # TODO: figure out how to make the GUI create a pop-up at this point rather than throwing an exception.
             self.log.exception("finished scan.")
+
+        if debug_line_duration:
+            t_end_line = time.perf_counter()
+            print("elapsed sweeps = {}".format(self.elapsed_sweeps))
+            dt_line_total = t_end_line - t_start_line
+            print("total line duration = {} s".format(dt_line_total))
+            dt_line_no_track = t_end_line - t_after_tracking
+            print("line duration (no tracking) = {} s".format(dt_line_no_track))
+            dt_fastcounter = t_end_fastcounter - t_start_fastcounter
+            print("fastcounter durations: {}".format(dt_fastcounter)) # TODO: is this too much?
+            print("fastcounter durations: first, last, mean = {}, {}, {} s".format(dt_fastcounter[0], dt_fastcounter[-1], dt_fastcounter.mean()))
+            print("fastcounter total = {} s".format(dt_fastcounter))
+            print("fastcounter nominal total = {} s".format(dt_fastcounter_nominal))
+            print("fastcounter total / fastcounter nominal = {}".format(dt_fastcounter/dt_fastcounter_nominal))
+            print("fastcounter total / line duration (no tracking) = {}".format(dt_fastcounter/dt_line_no_track))
+            print("fastcounter nominal / line duration (no tracking) = {}".format(dt_fastcounter_nominal/dt_line_no_track))
         return
 
     ##################################################
