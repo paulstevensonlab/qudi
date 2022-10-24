@@ -495,6 +495,7 @@ class PulsedMasterLogic(GenericLogic):
             if self.stopRequested:
                 self.stopRequested = False
                 self.mw_off()
+                self.pulsegenerator().set_continuous_out([1, 1, 1, 0, 0, 0, 0, 0])
                 if self.autosave:
                     self.save_pulsed_data(tag=self.fname, timestamp=self.timestarted)
                 self.sigExptRunningUpdated.emit(False)
