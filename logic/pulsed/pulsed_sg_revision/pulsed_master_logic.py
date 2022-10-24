@@ -605,10 +605,11 @@ class PulsedMasterLogic(GenericLogic):
             dt_fastcounter = t_end_fastcounter - t_start_fastcounter
             print("fastcounter durations: {}".format(dt_fastcounter)) # TODO: is this too much?
             print("fastcounter durations: first, last, mean = {}, {}, {} s".format(dt_fastcounter[0], dt_fastcounter[-1], dt_fastcounter.mean()))
-            print("fastcounter total = {} s".format(dt_fastcounter))
+            dt_fastcounter_total = np.sum(dt_fastcounter)
+            print("fastcounter total = {} s".format(dt_fastcounter_total))
             print("fastcounter nominal total = {} s".format(dt_fastcounter_nominal))
-            print("fastcounter total / fastcounter nominal = {}".format(dt_fastcounter/dt_fastcounter_nominal))
-            print("fastcounter total / line duration (no tracking) = {}".format(dt_fastcounter/dt_line_no_track))
+            print("fastcounter total / fastcounter nominal = {}".format(dt_fastcounter_total/dt_fastcounter_nominal))
+            print("fastcounter total / line duration (no tracking) = {}".format(dt_fastcounter_total/dt_line_no_track))
             print("fastcounter nominal / line duration (no tracking) = {}".format(dt_fastcounter_nominal/dt_line_no_track))
         return
 
