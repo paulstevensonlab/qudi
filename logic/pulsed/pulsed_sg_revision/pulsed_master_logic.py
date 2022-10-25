@@ -533,6 +533,7 @@ class PulsedMasterLogic(GenericLogic):
                         self.sequence_dict['Levels'] = self.hahn_sequence(tau,self.final_sweep_list.max())
                     elif self.exptrunning == 'T1':
                         self.sequence_dict['Levels'] = self.t1_sequence(tau,self.final_sweep_list.max())
+                        self.fastcounter().configure(1.e-9, 1e-9 * (self.pulselengths[2] + tau + 200), 1)
                     self.pulsegenerator().direct_write(self.sequence_dict)
                     self.pulsegenerator().pulser_on()
                     # TODO: make the PulseStreamer output high when we want to measure signal
