@@ -1042,15 +1042,8 @@ class ConfocalLogic(GenericLogic):
                         self.image_z_range[0],
                         self.image_z_range[1]]
 
-        figs = {ch: self.draw_figure(data=self.depth_image[:, :, 3 + n],
-                                     image_extent=image_extent,
-                                     scan_axis=axes,
-                                     cbar_range=colorscale_range,
-                                     percentile_range=percentile_range,
-                                     crosshair_pos=crosshair_pos)
-                for n, ch in enumerate(self.get_scanner_count_channels())}
-
         # Save the image data and figure
+        figs = {}
         for n, ch in enumerate(self.get_scanner_count_channels()):
             # data for the text-array "image":
             image_data = OrderedDict()
@@ -1060,6 +1053,17 @@ class ConfocalLogic(GenericLogic):
                 'of entries where the Signal is in counts/s:'] = self.depth_image[:, :, 3 + n]
 
             filelabel = 'confocal_depth_image_{0}'.format(ch.replace('/', ''))
+            fig_title = timestamp.strftime('%Y%m%d-%H%M-%S') + '_' + filelabel
+            plotfig = self.draw_figure(
+                data=self.depth_image[:, :, 3 + n],
+                image_extent=image_extent,
+                scan_axis=axes,
+                cbar_range=colorscale_range,
+                percentile_range=percentile_range,
+                crosshair_pos=crosshair_pos,
+                title=fig_title
+            )
+            figs[ch] = plotfig
             self._save_logic.save_data(image_data,
                                        filepath=filepath,
                                        timestamp=timestamp,
@@ -1067,7 +1071,7 @@ class ConfocalLogic(GenericLogic):
                                        filelabel=filelabel,
                                        fmt='%.6e',
                                        delimiter='\t',
-                                       plotfig=figs[ch])
+                                       plotfig=plotfig)
 
         # prepare the full raw data in an OrderedDict:
         data = OrderedDict()
