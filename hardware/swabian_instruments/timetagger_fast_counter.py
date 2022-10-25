@@ -169,7 +169,9 @@ class TimeTaggerFastCounter(Base, FastCounterInterface):
         """ Duration is in seconds"""
         # self.module_state.lock()
         self.pulsed.startFor(int(1e12*duration),clear=True)
-        self.pulsed.waitUntilFinished()
+        finished = self.pulsed.waitUntilFinished()
+        if finished == False:
+            self.log.error("TimeTagger timeout")
         return np.array(self.pulsed.getData(), dtype='int64')
 
 
