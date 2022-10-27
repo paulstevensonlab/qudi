@@ -456,7 +456,7 @@ class PulsedMasterLogic(GenericLogic):
                 end_inds = [int(self.cwparams[5] * 1e9), int(2 * self.cwparams[5] * 1e9) - 1]
             else:
                 st_inds = [100, int(100 + self.pulselengths[3])]
-                end_inds = [int(self.pulselengths[2] - self.pulselengths[3]) - 50, int(self.pulselengths[2]) - 50]
+                end_inds = [int(self.pulselengths[2] - self.pulselengths[3]), int(self.pulselengths[2])]
             sig_temp = np.array(fromcounter[0, st_inds[0]:st_inds[1]],dtype=float)
             sig_temp[sig_temp == np.inf] = np.nan
             signal = np.mean(sig_temp)
