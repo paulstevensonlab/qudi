@@ -522,6 +522,8 @@ class PulsedMasterLogic(GenericLogic):
                 if debug_line_duration:
                     t_start_fastcounter = np.zeros(len(self.final_sweep_list))
                     t_end_fastcounter = np.zeros(len(self.final_sweep_list))
+                    t_start_configure = np.zeros(len(self.final_sweep_list))
+                    t_end_configure = np.zeros(len(self.final_sweep_list))
                     dt_fastcounter_nominal = self.exptparams[3] * len(self.final_sweep_list)
                 for k, tau in enumerate(self.final_sweep_list):
                     self.sequence_dict['Channels'] = self.pulseconfigs
@@ -533,7 +535,11 @@ class PulsedMasterLogic(GenericLogic):
                         self.sequence_dict['Levels'] = self.hahn_sequence(tau,self.final_sweep_list.max())
                     elif self.exptrunning == 'T1':
                         self.sequence_dict['Levels'] = self.t1_sequence(tau,self.final_sweep_list.max())
+                        if debug_line_duration:
+                            t_start_configure[k] = time.perf_counter()
                         self.fastcounter().configure(1.e-9, 1e-9 * (self.pulselengths[2] + tau + 200), 1)
+                        if debug_line_duration:
+                            t_end_configure[k] = time.perf_counter()
                     self.pulsegenerator().direct_write(self.sequence_dict)
                     self.pulsegenerator().pulser_on()
                     # TODO: make the PulseStreamer output high when we want to measure signal
@@ -613,6 +619,9 @@ class PulsedMasterLogic(GenericLogic):
             print("fastcounter total / fastcounter nominal = {}".format(dt_fastcounter_total/dt_fastcounter_nominal))
             print("fastcounter total / line duration (no tracking) = {}".format(dt_fastcounter_total/dt_line_no_track))
             print("fastcounter nominal / line duration (no tracking) = {}".format(dt_fastcounter_nominal/dt_line_no_track))
+            dt_configure = t_end_configure - t_start_configure
+            print("configure durations: {}".format(dt_configure)) # TODO: is this too much?
+            print("configure durations: first, last, mean = {}, {}, {} s".format(dt_configure[0], dt_configure[-1], dt_configure.mean()))
         return
 
     ##################################################
