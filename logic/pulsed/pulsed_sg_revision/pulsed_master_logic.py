@@ -525,7 +525,10 @@ class PulsedMasterLogic(GenericLogic):
                 if debug_line_duration:
                     t_start_fastcounter = np.zeros(len(self.final_sweep_list))
                     t_end_fastcounter = np.zeros(len(self.final_sweep_list))
+                    t_start_pulsegenerator = np.zeros(len(self.final_sweep_list))
+                    t_end_pulsegenerator = np.zeros(len(self.final_sweep_list))
                     dt_fastcounter_nominal = self.exptparams[3] * len(self.final_sweep_list)
+
                 for k, tau in enumerate(self.final_sweep_list):
                     self.sequence_dict['Channels'] = self.pulseconfigs
                     if self.exptrunning == 'Rabi':
@@ -537,8 +540,12 @@ class PulsedMasterLogic(GenericLogic):
                     elif self.exptrunning == 'T1':
                         self.sequence_dict['Levels'] = self.t1_sequence(tau,self.final_sweep_list.max())
                         self.fastcounter().configure(1.e-9, 1e-9 * (self.pulselengths[2] + tau + 200), 1)
+                    if debug_line_duration:
+                        t_start_pulsegenerator[k] = time.perf_counter()
                     self.pulsegenerator().direct_write(self.sequence_dict)
                     self.pulsegenerator().pulser_on()
+                    if debug_line_duration:
+                        t_end_pulsegenerator[k] = time.perf_counter()
                     # TODO: make the PulseStreamer output high when we want to measure signal
                     # TODO: make the PulseStreamer output high when we want to measure reference
                     if debug_line_duration:
@@ -560,10 +567,16 @@ class PulsedMasterLogic(GenericLogic):
                 if debug_line_duration:
                     t_start_fastcounter = np.zeros(int(self.final_sweep_list.shape[0]))
                     t_end_fastcounter = np.zeros(int(self.final_sweep_list.shape[0]))
+                    t_start_mw_trigger = np.zeros(int(self.final_sweep_list.shape[0]))
+                    t_end_mw_trigger = np.zeros(int(self.final_sweep_list.shape[0]))
                     dt_fastcounter_nominal = self.exptparams[3]*int(self.final_sweep_list.shape[0])
                 self.odmrlogic1()._mw_device.reset_sweeppos()
                 for k in range(int(self.final_sweep_list.shape[0])):
+                    if debug_line_duration:
+                        t_start_mw_trigger[k] = time.perf_counter()
                     self.odmrlogic1()._mw_device.trigger()
+                    if debug_line_duration:
+                        t_end_mw_trigger[k] = time.perf_counter()
                     # TODO: make the PulseStreamer output high when we want to measure signal
                     # TODO: make the PulseStreamer output high when we want to measure reference
                     if debug_line_duration:
@@ -617,6 +630,16 @@ class PulsedMasterLogic(GenericLogic):
             print("fastcounter total / fastcounter nominal = {}".format(dt_fastcounter_total/dt_fastcounter_nominal))
             print("fastcounter total / line duration (no tracking) = {}".format(dt_fastcounter_total/dt_line_no_track))
             print("fastcounter nominal / line duration (no tracking) = {}".format(dt_fastcounter_nominal/dt_line_no_track))
+            if self.scanvar == 'Time':
+                dt_pulsegenerator = t_end_pulsegenerator - t_start_pulsegenerator
+                print("pulsegenerator durations: min, mean, max = {}, {}, {} s".format(dt_pulsegenerator.min(),
+                                                                                       dt_pulsegenerator.mean(),
+                                                                                       dt_pulsegenerator.max()))
+            elif self.scanvar == 'Freq':
+                dt_mw_trigger = t_end_mw_trigger - t_start_mw_trigger
+                print("MW trigger durations: min, mean, max = {}, {}, {} s".format(dt_mw_trigger.min(),
+                                                                                       dt_mw_trigger.mean(),
+                                                                                       dt_mw_trigger.max()))
         return
 
     ##################################################
