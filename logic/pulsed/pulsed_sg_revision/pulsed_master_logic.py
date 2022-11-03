@@ -482,7 +482,7 @@ class PulsedMasterLogic(GenericLogic):
 
     def _scan_pulse_line(self):
         if self.debug_line_duration == 1:
-            print("line duration debugging enabled")
+            print("line duration debugging enabled, time = {}".format(datetime.datetime.now()))
             # Use a local variable that's flipped at the beginning of a scan
             # so we don't enable debug halfway through the scan
             # and get bad timestamps or UnboundLocalErrors.
