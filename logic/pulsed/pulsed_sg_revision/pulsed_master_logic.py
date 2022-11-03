@@ -624,22 +624,27 @@ class PulsedMasterLogic(GenericLogic):
             print("fastcounter durations: {}".format(dt_fastcounter)) # TODO: is this too much?
             print("fastcounter durations: first, last = {}, {} s".format(dt_fastcounter[0], dt_fastcounter[-1]))
             print("fastcounter durations: min, mean, max = {}, {}, {} s".format(dt_fastcounter.min(), dt_fastcounter.mean(), dt_fastcounter.max()))
+            if self.scanvar == 'Time':
+                dt_pulsegenerator = t_end_pulsegenerator - t_start_pulsegenerator
+                print("pulsegenerator durations: min, mean, max = {}, {}, {} s".format(dt_pulsegenerator.min(),
+                                                                                       dt_pulsegenerator.mean(),
+                                                                                     dt_pulsegenerator.max()))
+                dt_pulsegenerator_total = np.sum(dt_pulsegenerator)
+                print("pulsegenerator total = {} s".format(dt_pulsegenerator_total))
+            elif self.scanvar == 'Freq':
+                dt_mw_trigger = t_end_mw_trigger - t_start_mw_trigger
+                print("MW trigger durations: min, mean, max = {}, {}, {} s".format(dt_mw_trigger.min(),
+                                                                                       dt_mw_trigger.mean(),
+                                                                                       dt_mw_trigger.max()))
+                dt_mw_trigger_total = np.sum(dt_mw_trigger)
+                print("MW trigger total = {} s".format(dt_mw_trigger_total))
             dt_fastcounter_total = np.sum(dt_fastcounter)
             print("fastcounter total = {} s".format(dt_fastcounter_total))
             print("fastcounter nominal total = {} s".format(dt_fastcounter_nominal))
             print("fastcounter total / fastcounter nominal = {}".format(dt_fastcounter_total/dt_fastcounter_nominal))
             print("fastcounter total / line duration (no tracking) = {}".format(dt_fastcounter_total/dt_line_no_track))
             print("fastcounter nominal / line duration (no tracking) = {}".format(dt_fastcounter_nominal/dt_line_no_track))
-            if self.scanvar == 'Time':
-                dt_pulsegenerator = t_end_pulsegenerator - t_start_pulsegenerator
-                print("pulsegenerator durations: min, mean, max = {}, {}, {} s".format(dt_pulsegenerator.min(),
-                                                                                       dt_pulsegenerator.mean(),
-                                                                                       dt_pulsegenerator.max()))
-            elif self.scanvar == 'Freq':
-                dt_mw_trigger = t_end_mw_trigger - t_start_mw_trigger
-                print("MW trigger durations: min, mean, max = {}, {}, {} s".format(dt_mw_trigger.min(),
-                                                                                       dt_mw_trigger.mean(),
-                                                                                       dt_mw_trigger.max()))
+
         return
 
     ##################################################
