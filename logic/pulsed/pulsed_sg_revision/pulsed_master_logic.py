@@ -120,6 +120,7 @@ class PulsedMasterLogic(GenericLogic):
                                                        QtCore.Qt.QueuedConnection)
 
         self.number_of_lines = self.rabiparams[4]
+        self.max_line_duration_s = 600.0 # don't allow lines longer than 10 minutes
         self.iscw = False # TODO: remove this unused function
         self.fname = ''
         self.debug = 0
@@ -349,6 +350,16 @@ class PulsedMasterLogic(GenericLogic):
 
         return
 
+    def estimate_line_duration(self):
+        start, stop, step = self.exptparams[0], self.exptparams[1], self.exptparams[2]
+        dwell_time_s = self.exptparams[3]
+        if self.logscale:
+            N_steps = step
+        else:
+            N_steps = (stop - start )/step
+        nominal_line_duration = dwell_time_s * N_steps
+        return nominal_line_duration
+
     def start_pulsed_scan(self):
 
         self.timestarted = datetime.datetime.now()
@@ -426,6 +437,11 @@ class PulsedMasterLogic(GenericLogic):
             else:
                 self.stopRequested = True
                 print("I don't know what that experiment is")
+
+            approx_line_duration = self.estimate_line_duration()
+            if approx_line_duration > self.max_line_duration_s:
+                self.log.error('Line duration too long: {} > {}'.format(approx_line_duration, self.max_line_duration_s))
+                return -1
 
             self._initialize_pulsed_plots()
             self.exptrunning = self.expt_current
