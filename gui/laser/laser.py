@@ -95,7 +95,6 @@ class LaserGUI(GUIBase):
 
         # Load the VOA value, either the old one or the default.
         self._mw.VoaVoltageDoubleSpinBox.setValue(self._laser_logic.voa_voltage)
-        # TODO: make this survive closing and re-opening the program
 
         # set up plot
         self._mw.plotWidget = pg.PlotWidget(
